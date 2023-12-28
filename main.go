@@ -1,7 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/configuration"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/router"
+)
+
+var (
+	logger *configuration.Logger
+)
 
 func main() {
-	fmt.Println("Hello, World!")
+	logger = configuration.GetLogger("main")
+	logger.Info("Starting application...")
+
+	router.InitServer()
 }
