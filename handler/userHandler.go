@@ -15,6 +15,16 @@ var (
 	customValidator = validator.Validator(request.UserRequestDto{})
 )
 
+// CreateUser
+// @Summary Create a new user
+// @Description Create a new user based on the provided user request data.
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param userRequest body request.UserRequestDto true "User data"
+// @Success 201 {object} response.UserResponseDto "User created successfully"
+// @Failure 422 {object} response.ErrorDto "Error while binding JSON or validation error"
+// @Router /users [post]
 func CreateUser(context *gin.Context) {
 	var requestBody request.UserRequestDto
 	err := context.BindJSON(&requestBody)

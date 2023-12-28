@@ -1,0 +1,68 @@
+definitions:
+  request.UserRequestDto:
+    properties:
+      age:
+        type: integer
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+    required:
+    - age
+    - email
+    - firstName
+    - lastName
+    type: object
+  response.ErrorDto:
+    properties:
+      field: {}
+      message:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  response.UserResponseDto:
+    properties:
+      age:
+        type: integer
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user based on the provided user request data.
+      parameters:
+      - description: User data
+        in: body
+        name: userRequest
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserRequestDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/response.UserResponseDto'
+        "422":
+          description: Error while binding JSON or validation error
+          schema:
+            $ref: '#/definitions/response.ErrorDto'
+      summary: Create a new user
+      tags:
+      - Users
+swagger: "2.0"
