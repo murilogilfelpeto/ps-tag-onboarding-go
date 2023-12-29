@@ -3,7 +3,6 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/golodash/galidator"
-	"github.com/google/uuid"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler/dto/request"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler/dto/response"
 	"net/http"
@@ -15,7 +14,7 @@ var (
 	customValidator = validator.Validator(request.UserRequestDto{})
 )
 
-// CreateUser
+// Save
 // @Summary Create a new user
 // @Description Create a new user based on the provided user request data.
 // @Tags Users
@@ -25,7 +24,7 @@ var (
 // @Success 201 {object} response.UserResponseDto "User created successfully"
 // @Failure 422 {object} response.ErrorDto "Error while binding JSON or validation error"
 // @Router /users [post]
-func CreateUser(context *gin.Context) {
+func Save(context *gin.Context) {
 	var requestBody request.UserRequestDto
 	err := context.BindJSON(&requestBody)
 	if err != nil {
@@ -44,7 +43,29 @@ func CreateUser(context *gin.Context) {
 		LastName:  requestBody.LastName,
 		Email:     requestBody.Email,
 		Age:       requestBody.Age,
-		ID:        uuid.New().String(),
+		ID:        "8ce77f99-5684-4254-b34f-42d496ccab05",
 	}
 	context.IndentedJSON(http.StatusCreated, responseBody)
+}
+
+// FindById
+// @Summary Find user by id
+// @Description Find user by provided id
+// @Tags Users
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 201 {object} response.UserResponseDto "User Found successfully"
+// @Failure 422 {object} response.ErrorDto "Id in the wrong format"
+// @Failure 404 {object} response.ErrorDto "User not found"
+// @Router /users/{id} [get]
+func FindById(context *gin.Context) {
+	id := context.Param("id")
+	responseBody := response.UserResponseDto{
+		FirstName: "Murilo",
+		LastName:  "Felpeto",
+		Email:     "murilo@wexinc.com",
+		Age:       30,
+		ID:        id,
+	}
+	context.IndentedJSON(http.StatusOK, responseBody)
 }
