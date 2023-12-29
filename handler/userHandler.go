@@ -76,12 +76,15 @@ func Save(context *gin.Context) {
 // @Router /users/{id} [get]
 func FindById(context *gin.Context) {
 	id := context.Param("id")
-	responseBody := response.UserResponseDto{
-		FirstName: "Murilo",
-		LastName:  "Felpeto",
-		Email:     "murilo@wexinc.com",
-		Age:       30,
-		ID:        id,
+	user, err := service.GetUserById(id)
+	if err != nil {
+		errorResponse := response.ErrorDto{
+			Message:   "User not found: " + err.Error(),
+			Timestamp: time.Now(),
+		}
+		context.IndentedJSON(http.StatusNotFound, errorResponse)
+		return
 	}
+	responseBody := mapper.UserToUserResponseDto(user)
 	context.IndentedJSON(http.StatusOK, responseBody)
 }
