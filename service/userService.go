@@ -1,14 +1,18 @@
 package service
 
-import "github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models"
+import (
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/repository"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models/exceptions"
+)
 
 func SaveUser(user models.User) (models.User, error) {
-	newUser, err := models.NewUser("59849d54-4ff1-468c-adad-6e9d94f37311", user.GetFirstName(), user.GetLastName(), user.GetEmail(), user.GetAge())
+	createdUser, err := repository.Save(user)
 	if err != nil {
-		logger.Errorf("Error creating user: %v", err)
-		return models.User{}, err
+		logger.Errorf("Error persisting user: %v", err)
+		return models.User{}, &exceptions.UserAlreadyExistErr{Message: "User already exists: " + user.GetFullName()}
 	}
-	return newUser, nil
+	return createdUser, nil
 }
 
 func GetUserById(id string) (models.User, error) {
@@ -17,5 +21,6 @@ func GetUserById(id string) (models.User, error) {
 		logger.Errorf("Error finding user: %v", err)
 		return models.User{}, err
 	}
+
 	return newUser, nil
 }

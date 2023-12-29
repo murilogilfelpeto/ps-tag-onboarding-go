@@ -70,3 +70,7 @@ func (user User) GetEmail() string {
 func (user User) GetAge() int {
 	return user.age
 }
+
+func (user User) GetFullName() string {
+	return user.firstName + " " + user.lastName
+}
