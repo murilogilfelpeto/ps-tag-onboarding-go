@@ -9,7 +9,7 @@ import (
 func SaveUser(user models.User) (models.User, error) {
 	userByFullName, err := repository.GetUserByFullName(user.GetFirstName(), user.GetLastName())
 	if err == nil && userByFullName.GetID() != "" {
-		logger.Errorf("Error persisting user: %v", err)
+		logger.Errorf("User already exists: %v", user.GetFullName())
 		return models.User{}, &exceptions.UserAlreadyExistErr{Message: "User already exists: " + user.GetFullName()}
 	}
 	createdUser, err := repository.Save(user)

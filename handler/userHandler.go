@@ -51,7 +51,7 @@ func Save(context *gin.Context) {
 	}
 	createdUser, err := service.SaveUser(user)
 	if err != nil {
-		logger.Error("Error while persisting user: ", err)
+		logger.Error("Error while persisting user ", err)
 		errorResponse := response.ErrorDto{
 			Message:   "Error while creating user: " + err.Error(),
 			Timestamp: time.Now(),
