@@ -34,3 +34,16 @@ func GetUserById(id string) (models.User, error) {
 	user, err := mapper.UserEntityToUser(userEntity)
 	return user, nil
 }
+
+func GetUserByFullName(firstName string, lastName string) (models.User, error) {
+	logger.Infof("Getting user by full name %s %s", firstName, lastName)
+	var userEntity entities.UserEntity
+	err := userCollection.FindOne(context, bson.M{"first_name": firstName, "last_name": lastName}).Decode(&userEntity)
+	if err != nil {
+		logger.Errorf("Error getting user by full name %s %s: %v", firstName, lastName, err)
+		return models.User{}, err
+	}
+	logger.Infof("User %s %s found successfully", firstName, lastName)
+	user, _ := mapper.UserEntityToUser(userEntity)
+	return user, nil
+}

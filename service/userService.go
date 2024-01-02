@@ -7,10 +7,15 @@ import (
 )
 
 func SaveUser(user models.User) (models.User, error) {
+	userByFullName, err := repository.GetUserByFullName(user.GetFirstName(), user.GetLastName())
+	if err == nil && userByFullName.GetID() != "" {
+		logger.Errorf("Error persisting user: %v", err)
+		return models.User{}, &exceptions.UserAlreadyExistErr{Message: "User already exists: " + user.GetFullName()}
+	}
 	createdUser, err := repository.Save(user)
 	if err != nil {
 		logger.Errorf("Error persisting user: %v", err)
-		return models.User{}, &exceptions.UserAlreadyExistErr{Message: "User already exists: " + user.GetFullName()}
+		return models.User{}, &exceptions.UserValidationErr{Message: "Error persisting user: " + user.GetFullName()}
 	}
 	return createdUser, nil
 }
