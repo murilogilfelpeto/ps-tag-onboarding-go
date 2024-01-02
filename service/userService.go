@@ -16,11 +16,10 @@ func SaveUser(user models.User) (models.User, error) {
 }
 
 func GetUserById(id string) (models.User, error) {
-	newUser, err := models.NewUser(id, "Murilo", "Felpeto", "murilo@wexinc.com", 30)
+	user, err := repository.GetUserById(id)
 	if err != nil {
 		logger.Errorf("Error finding user: %v", err)
-		return models.User{}, err
+		return models.User{}, &exceptions.UserNotFoundErr{Message: "User not found: " + id}
 	}
-
-	return newUser, nil
+	return user, nil
 }

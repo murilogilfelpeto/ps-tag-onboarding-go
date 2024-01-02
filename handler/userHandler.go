@@ -79,7 +79,7 @@ func FindById(context *gin.Context) {
 	user, err := service.GetUserById(id)
 	if err != nil {
 		errorResponse := response.ErrorDto{
-			Message:   "User not found: " + err.Error(),
+			Message:   err.Error(),
 			Timestamp: time.Now(),
 		}
 		context.IndentedJSON(http.StatusNotFound, errorResponse)
