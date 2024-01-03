@@ -5,6 +5,8 @@ import (
 	"github.com/golodash/galidator"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler/dto/request"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler/dto/response"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler/mapper"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service"
 	"net/http"
 	"time"
 )
@@ -37,14 +39,28 @@ func Save(context *gin.Context) {
 		context.IndentedJSON(http.StatusUnprocessableEntity, errorResponse)
 		return
 	}
-
-	responseBody := response.UserResponseDto{
-		FirstName: requestBody.FirstName,
-		LastName:  requestBody.LastName,
-		Email:     requestBody.Email,
-		Age:       requestBody.Age,
-		ID:        "8ce77f99-5684-4254-b34f-42d496ccab05",
+	user, err := mapper.UserRequestToUser(requestBody)
+	if err != nil {
+		logger.Error("Error while creating user: ", err)
+		errorResponse := response.ErrorDto{
+			Message:   "Error while creating user: " + err.Error(),
+			Timestamp: time.Now(),
+		}
+		context.IndentedJSON(http.StatusUnprocessableEntity, errorResponse)
+		return
 	}
+	createdUser, err := service.SaveUser(user)
+	if err != nil {
+		logger.Error("Error while persisting user: ", err)
+		errorResponse := response.ErrorDto{
+			Message:   "Error while creating user: " + err.Error(),
+			Timestamp: time.Now(),
+		}
+		context.IndentedJSON(http.StatusUnprocessableEntity, errorResponse)
+		return
+	}
+
+	responseBody := mapper.UserToUserResponseDto(createdUser)
 	context.IndentedJSON(http.StatusCreated, responseBody)
 }
 
@@ -53,19 +69,22 @@ func Save(context *gin.Context) {
 // @Description Find user by provided id
 // @Tags Users
 // @Produce json
-// @Param id path int true "User ID"
+// @Param id path int true "User id"
 // @Success 201 {object} response.UserResponseDto "User Found successfully"
 // @Failure 422 {object} response.ErrorDto "Id in the wrong format"
 // @Failure 404 {object} response.ErrorDto "User not found"
 // @Router /users/{id} [get]
 func FindById(context *gin.Context) {
 	id := context.Param("id")
-	responseBody := response.UserResponseDto{
-		FirstName: "Murilo",
-		LastName:  "Felpeto",
-		Email:     "murilo@wexinc.com",
-		Age:       30,
-		ID:        id,
+	user, err := service.GetUserById(id)
+	if err != nil {
+		errorResponse := response.ErrorDto{
+			Message:   "User not found: " + err.Error(),
+			Timestamp: time.Now(),
+		}
+		context.IndentedJSON(http.StatusNotFound, errorResponse)
+		return
 	}
+	responseBody := mapper.UserToUserResponseDto(user)
 	context.IndentedJSON(http.StatusOK, responseBody)
 }
