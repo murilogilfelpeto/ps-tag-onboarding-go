@@ -20,4 +20,5 @@ func main() {
 	}
 
 	router.InitServer()
+	logger.Info("Application started successfully")
 }

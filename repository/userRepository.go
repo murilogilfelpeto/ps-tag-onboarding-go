@@ -24,8 +24,14 @@ func Save(user models.User) (models.User, error) {
 func GetUserById(id string) (models.User, error) {
 	logger.Infof("Getting user by id %s", id)
 	var userEntity entities.UserEntity
-	uid := uuid.MustParse(id)
-	err := userCollection.FindOne(context, bson.M{"_id": uid}).Decode(&userEntity)
+
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		logger.Errorf("Error parsing user id %s: %v", id, err)
+		return models.User{}, err
+	}
+
+	err = userCollection.FindOne(context, bson.M{"_id": uid}).Decode(&userEntity)
 	if err != nil {
 		logger.Errorf("Error getting user by id %s: %v", id, err)
 		return models.User{}, err
