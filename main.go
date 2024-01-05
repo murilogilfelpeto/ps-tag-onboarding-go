@@ -13,5 +13,11 @@ func main() {
 	logger = configuration.GetLogger("main")
 	logger.Info("Starting application...")
 
+	err := configuration.Init()
+	if err != nil {
+		logger.Errorf("Error initializing application: %v", err)
+		return
+	}
+
 	router.InitServer()
 }

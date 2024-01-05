@@ -51,7 +51,7 @@ func Save(context *gin.Context) {
 	}
 	createdUser, err := service.SaveUser(user)
 	if err != nil {
-		logger.Error("Error while persisting user: ", err)
+		logger.Error("Error while persisting user ", err)
 		errorResponse := response.ErrorDto{
 			Message:   "Error while creating user: " + err.Error(),
 			Timestamp: time.Now(),
@@ -79,7 +79,7 @@ func FindById(context *gin.Context) {
 	user, err := service.GetUserById(id)
 	if err != nil {
 		errorResponse := response.ErrorDto{
-			Message:   "User not found: " + err.Error(),
+			Message:   err.Error(),
 			Timestamp: time.Now(),
 		}
 		context.IndentedJSON(http.StatusNotFound, errorResponse)

@@ -1,21 +1,30 @@
 package service
 
-import "github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models"
+import (
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/repository"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models/exceptions"
+)
 
 func SaveUser(user models.User) (models.User, error) {
-	newUser, err := models.NewUser("59849d54-4ff1-468c-adad-6e9d94f37311", user.GetFirstName(), user.GetLastName(), user.GetEmail(), user.GetAge())
-	if err != nil {
-		logger.Errorf("Error creating user: %v", err)
-		return models.User{}, err
+	userByFullName, err := repository.GetUserByFullName(user.GetFirstName(), user.GetLastName())
+	if err == nil && userByFullName.GetID() != "" {
+		logger.Errorf("User already exists: %v", user.GetFullName())
+		return models.User{}, &exceptions.UserAlreadyExistErr{Message: "User already exists: " + user.GetFullName()}
 	}
-	return newUser, nil
+	createdUser, err := repository.Save(user)
+	if err != nil {
+		logger.Errorf("Error persisting user: %v", err)
+		return models.User{}, &exceptions.UserValidationErr{Message: "Error persisting user: " + user.GetFullName()}
+	}
+	return createdUser, nil
 }
 
 func GetUserById(id string) (models.User, error) {
-	newUser, err := models.NewUser(id, "Murilo", "Felpeto", "murilo@wexinc.com", 30)
+	user, err := repository.GetUserById(id)
 	if err != nil {
 		logger.Errorf("Error finding user: %v", err)
-		return models.User{}, err
+		return models.User{}, &exceptions.UserNotFoundErr{Message: "User not found: " + id}
 	}
-	return newUser, nil
+	return user, nil
 }

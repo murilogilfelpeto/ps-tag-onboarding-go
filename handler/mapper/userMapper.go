@@ -12,6 +12,7 @@ func UserRequestToUser(userRequest request.UserRequestDto) (models.User, error) 
 
 func UserToUserResponseDto(user models.User) response.UserResponseDto {
 	return response.UserResponseDto{
+		ID:        user.GetID(),
 		FirstName: user.GetFirstName(),
 		LastName:  user.GetLastName(),
 		Email:     user.GetEmail(),
