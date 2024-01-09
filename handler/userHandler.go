@@ -37,7 +37,7 @@ func (h *handler) Save(context *gin.Context) {
 			Timestamp: time.Now(),
 			Field:     customValidator.DecryptErrors(err),
 		}
-		context.IndentedJSON(http.StatusUnprocessableEntity, errorResponse)
+		context.IndentedJSON(http.StatusBadRequest, errorResponse)
 		return
 	}
 	user, err := mapper.UserRequestToUser(requestBody)
