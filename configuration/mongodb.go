@@ -2,6 +2,7 @@ package configuration
 
 import (
 	"context"
+	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -9,16 +10,25 @@ import (
 var (
 	userCollection *mongo.Collection
 	ctx            = context.TODO()
-	credentials    = options.Credential{
-		Username: "root",
-		Password: "root",
-	}
 )
+
+type DatabaseConfiguration struct {
+	Host       string
+	Port       string
+	User       string
+	Password   string
+	Database   string
+	Collection string
+}
 
 func InitializeDatabase() (*mongo.Collection, error) {
 	logger := GetLogger("mongodb")
 	logger.Info("Initializing database...")
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(credentials)
+
+	dbConfiguration := getDatabaseConfiguration()
+	credentials := getCredentials(dbConfiguration)
+	dbUrl := getDatabaseUrl(dbConfiguration)
+	clientOptions := options.Client().ApplyURI(dbUrl).SetAuth(credentials)
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		logger.Errorf("Error connecting to database: %v", err)
@@ -31,10 +41,32 @@ func InitializeDatabase() (*mongo.Collection, error) {
 		return nil, err
 	}
 
-	userCollection = client.Database("onboarding").Collection("users")
+	userCollection = client.Database(dbConfiguration.Database).Collection(dbConfiguration.Collection)
 	return userCollection, nil
 }
 
 func GetContext() context.Context {
 	return ctx
+}
+
+func getDatabaseConfiguration() DatabaseConfiguration {
+	return DatabaseConfiguration{
+		Host:       viper.GetString("database.host"),
+		Port:       viper.GetString("database.port"),
+		User:       viper.GetString("database.user"),
+		Password:   viper.GetString("database.password"),
+		Database:   viper.GetString("database.database"),
+		Collection: viper.GetString("database.collection"),
+	}
+}
+
+func getCredentials(dbConfig DatabaseConfiguration) options.Credential {
+	return options.Credential{
+		Username: dbConfig.User,
+		Password: dbConfig.Password,
+	}
+}
+
+func getDatabaseUrl(dbConfig DatabaseConfiguration) string {
+	return "mongodb://" + dbConfig.Host + ":" + dbConfig.Port
 }
