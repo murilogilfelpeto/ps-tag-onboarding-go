@@ -27,6 +27,8 @@ var (
 // @Failure 422 {object} response.ErrorDto "Error while binding JSON or validation error"
 // @Router /users [post]
 func Save(context *gin.Context) {
+	logger.Infof("Saving user...")
+
 	var requestBody request.UserRequestDto
 	err := context.BindJSON(&requestBody)
 	if err != nil {
@@ -41,9 +43,9 @@ func Save(context *gin.Context) {
 	}
 	user, err := mapper.UserRequestToUser(requestBody)
 	if err != nil {
-		logger.Error("Error while creating user: ", err)
+		logger.Error("Error while creating user. ", err)
 		errorResponse := response.ErrorDto{
-			Message:   "Error while creating user: " + err.Error(),
+			Message:   "Error while mapping request to user: " + err.Error(),
 			Timestamp: time.Now(),
 		}
 		context.IndentedJSON(http.StatusUnprocessableEntity, errorResponse)
@@ -51,9 +53,9 @@ func Save(context *gin.Context) {
 	}
 	createdUser, err := service.SaveUser(user)
 	if err != nil {
-		logger.Error("Error while persisting user ", err)
+		logger.Error("Error while persisting user. ", err)
 		errorResponse := response.ErrorDto{
-			Message:   "Error while creating user: " + err.Error(),
+			Message:   "Error while creating user. " + err.Error(),
 			Timestamp: time.Now(),
 		}
 		context.IndentedJSON(http.StatusUnprocessableEntity, errorResponse)
@@ -76,8 +78,10 @@ func Save(context *gin.Context) {
 // @Router /users/{id} [get]
 func FindById(context *gin.Context) {
 	id := context.Param("id")
+	logger.Infof("Finding user by id %s", id)
 	user, err := service.GetUserById(id)
 	if err != nil {
+		logger.Errorf("Error while finding user by id %s. %v", id, err)
 		errorResponse := response.ErrorDto{
 			Message:   err.Error(),
 			Timestamp: time.Now(),
