@@ -7,9 +7,10 @@ This is the Go version of the [onboarding exercise](https://github.com/wexinc/ps
 - [Go](https://go.dev/)
 - [Gin](https://github.com/gin-gonic/gin)
 - [Galidator](https://github.com/golodash/galidator)
-- [Swagger] (https://github.com/swaggo/gin-swagger)
+- [Swagger](https://github.com/swaggo/gin-swagger)
 - [MongoDB](https://www.mongodb.com/)
 - [Docker](https://www.docker.com/)
+- [Viper](https://github.com/spf13/viper)
 
 ## Pre-requisites
 - Docker
