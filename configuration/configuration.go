@@ -9,6 +9,12 @@ var (
 
 func Init() error {
 	var err error
+	logger = GetLogger("configuration")
+	err = LoadConfiguration()
+	if err != nil {
+		logger.Errorf("Error loading configuration: %v", err)
+		return err
+	}
 	collection, err = InitializeDatabase()
 	if err != nil {
 		logger.Errorf("Error initializing database: %v", err)
