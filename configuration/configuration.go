@@ -15,12 +15,17 @@ func Init() (*AppConfig, error) {
 	logger := NewLogger("configuration")
 	logger.Info("Initializing configuration...")
 
+	err := LoadConfiguration()
+	if err != nil {
+		logger.Errorf("Error loading configuration: %v", err)
+		return nil, err
+	}
 	appConfig := &AppConfig{
 		Logger:  logger,
 		Context: context.Background(),
 	}
 
-	err := appConfig.initDatabase()
+	err = appConfig.initDatabase()
 	if err != nil {
 		logger.Errorf("Error initializing database: %v", err)
 		return nil, err
@@ -30,8 +35,7 @@ func Init() (*AppConfig, error) {
 }
 
 func (config *AppConfig) initDatabase() error {
-	dbConfig := NewDatabaseConfig("localhost", "27017", "root", "root", "onboarding", "users")
-	database, err := Connect(config.Context, dbConfig)
+	database, err := Connect(config.Context)
 	if err != nil {
 		return err
 	}
