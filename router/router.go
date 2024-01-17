@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/configuration"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler"
@@ -41,7 +42,7 @@ func (r *router) InitServer() {
 	}
 
 	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Errorf("Error starting server: %v", err)
 			panic(err)
 		}
@@ -56,7 +57,7 @@ func (r *router) InitServer() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := server.Shutdown(ctx); err != nil && err != http.ErrServerClosed {
+	if err := server.Shutdown(ctx); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		logger.Errorf("Error shutting down server: %v", err)
 		panic(err)
 	}
