@@ -17,9 +17,9 @@ func main() {
 
 	logger.Info("Starting application...")
 
-	userRepository := repository.NewRepository(appConfig.Database, "onboarding", "users")
-	userService := service.NewService(userRepository)
-	userHandler := handler.NewHandler(userService)
+	userRepository := repository.NewUserRepository(appConfig.Database, "onboarding", "users")
+	userService := service.NewUserService(userRepository)
+	userHandler := handler.NewUserHandler(userService)
 	userRoute := router.NewRouter(userHandler)
 	userRoute.InitServer()
 
