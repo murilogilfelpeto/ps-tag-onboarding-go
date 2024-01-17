@@ -17,6 +17,8 @@ func LoadConfiguration() error {
 			logger.Error("Config file not found")
 			return err
 		}
+		logger.Errorf("Error reading config file: %v", err)
+		return err
 	}
 	return nil
 }
