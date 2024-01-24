@@ -2,11 +2,25 @@ package service
 
 import (
 	"context"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/configuration"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/repository"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models/exceptions"
 )
 
-func (srv *service) SaveUser(ctx context.Context, user models.User) (models.User, error) {
+var logger = configuration.NewLogger("userService")
+
+type Service struct {
+	repository *repository.Repository
+}
+
+func NewUserService(repository *repository.Repository) *Service {
+	return &Service{
+		repository: repository,
+	}
+}
+
+func (srv *Service) SaveUser(ctx context.Context, user models.User) (models.User, error) {
 	logger.Infof("Saving user %s", user.GetFullName())
 	userByFullName, err := srv.repository.GetUserByFullName(ctx, user.GetFirstName(), user.GetLastName())
 	if err == nil && userByFullName.GetID() != "" {
@@ -22,7 +36,7 @@ func (srv *service) SaveUser(ctx context.Context, user models.User) (models.User
 	return createdUser, nil
 }
 
-func (srv *service) GetUserById(ctx context.Context, id string) (models.User, error) {
+func (srv *Service) GetUserById(ctx context.Context, id string) (models.User, error) {
 	logger.Infof("Getting user by id %s", id)
 	user, err := srv.repository.GetUserById(ctx, id)
 	if err != nil {
