@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/golodash/galidator"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/configuration"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler/dto/request"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler/dto/response"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler/mapper"
@@ -14,7 +15,18 @@ import (
 var (
 	validator       = galidator.New()
 	customValidator = validator.Validator(request.UserRequestDto{})
+	logger          = configuration.NewLogger("userHandler")
 )
+
+type Handler struct {
+	service *service.Service
+}
+
+func NewUserHandler(service *service.Service) *Handler {
+	return &Handler{
+		service: service,
+	}
+}
 
 // Save
 // @Summary Create a new user
@@ -26,7 +38,7 @@ var (
 // @Success 201 {object} response.UserResponseDto "User created successfully"
 // @Failure 422 {object} response.ErrorDto "Error while binding JSON or validation error"
 // @Router /users [post]
-func Save(context *gin.Context) {
+func (h *Handler) Save(context *gin.Context) {
 	logger.Infof("Saving user...")
 
 	var requestBody request.UserRequestDto
@@ -51,7 +63,7 @@ func Save(context *gin.Context) {
 		context.IndentedJSON(http.StatusUnprocessableEntity, errorResponse)
 		return
 	}
-	createdUser, err := service.SaveUser(user)
+	createdUser, err := h.service.SaveUser(context, user)
 	if err != nil {
 		logger.Error("Error while persisting user. ", err)
 		errorResponse := response.ErrorDto{
@@ -76,10 +88,10 @@ func Save(context *gin.Context) {
 // @Failure 422 {object} response.ErrorDto "Id in the wrong format"
 // @Failure 404 {object} response.ErrorDto "User not found"
 // @Router /users/{id} [get]
-func FindById(context *gin.Context) {
+func (h *Handler) FindById(context *gin.Context) {
 	id := context.Param("id")
 	logger.Infof("Finding user by id %s", id)
-	user, err := service.GetUserById(id)
+	user, err := h.service.GetUserById(context, id)
 	if err != nil {
 		logger.Errorf("Error while finding user by id %s. %v", id, err)
 		errorResponse := response.ErrorDto{

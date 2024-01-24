@@ -8,7 +8,7 @@ import (
 )
 
 func LoadConfiguration() error {
-	logger := GetLogger("Viper")
+	logger := NewLogger("mongodb")
 	loadEnvironmentVariables()
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -17,6 +17,8 @@ func LoadConfiguration() error {
 			logger.Error("Config file not found")
 			return err
 		}
+		logger.Errorf("Error reading config file: %v", err)
+		return err
 	}
 	return nil
 }

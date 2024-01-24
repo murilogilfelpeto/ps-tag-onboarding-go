@@ -1,32 +1,45 @@
 package configuration
 
-import "go.mongodb.org/mongo-driver/mongo"
-
-var (
-	logger     *Logger
-	collection *mongo.Collection
+import (
+	"context"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func Init() error {
-	var err error
-	logger = GetLogger("configuration")
-	err = LoadConfiguration()
+type AppConfig struct {
+	Logger   *Logger
+	Database *mongo.Client
+	Context  context.Context
+}
+
+func Init() (*AppConfig, error) {
+	logger := NewLogger("configuration")
+	logger.Info("Initializing configuration...")
+
+	err := LoadConfiguration()
 	if err != nil {
 		logger.Errorf("Error loading configuration: %v", err)
-		return err
+		return nil, err
 	}
-	collection, err = InitializeDatabase()
+	appConfig := &AppConfig{
+		Logger:  logger,
+		Context: context.Background(),
+	}
+
+	err = appConfig.initDatabase()
 	if err != nil {
 		logger.Errorf("Error initializing database: %v", err)
+		return nil, err
+	}
+
+	return appConfig, nil
+}
+
+func (config *AppConfig) initDatabase() error {
+	database, err := Connect(config.Context)
+	if err != nil {
 		return err
 	}
+
+	config.Database = database
 	return nil
-}
-
-func GetLogger(prefix string) *Logger {
-	return NewLogger(prefix)
-}
-
-func GetUserCollection() *mongo.Collection {
-	return collection
 }

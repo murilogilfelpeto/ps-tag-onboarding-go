@@ -7,22 +7,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var (
-	userCollection *mongo.Collection
-	ctx            = context.TODO()
-)
-
-type DatabaseConfiguration struct {
+type DatabaseConfig struct {
 	Host       string
 	Port       string
-	User       string
+	Username   string
 	Password   string
 	Database   string
 	Collection string
 }
 
-func InitializeDatabase() (*mongo.Collection, error) {
-	logger := GetLogger("mongodb")
+func Connect(ctx context.Context) (*mongo.Client, error) {
+	logger := NewLogger("mongodb")
 	logger.Info("Initializing database...")
 
 	dbConfiguration := getDatabaseConfiguration()
@@ -30,6 +25,7 @@ func InitializeDatabase() (*mongo.Collection, error) {
 	dbUrl := getDatabaseUrl(dbConfiguration)
 	clientOptions := options.Client().ApplyURI(dbUrl).SetAuth(credentials)
 	client, err := mongo.Connect(ctx, clientOptions)
+
 	if err != nil {
 		logger.Errorf("Error connecting to database: %v", err)
 		return nil, err
@@ -41,32 +37,27 @@ func InitializeDatabase() (*mongo.Collection, error) {
 		return nil, err
 	}
 
-	userCollection = client.Database(dbConfiguration.Database).Collection(dbConfiguration.Collection)
-	return userCollection, nil
+	return client, nil
 }
 
-func GetContext() context.Context {
-	return ctx
-}
-
-func getDatabaseConfiguration() DatabaseConfiguration {
-	return DatabaseConfiguration{
+func getDatabaseConfiguration() DatabaseConfig {
+	return DatabaseConfig{
 		Host:       viper.GetString("database.host"),
 		Port:       viper.GetString("database.port"),
-		User:       viper.GetString("database.user"),
+		Username:   viper.GetString("database.user"),
 		Password:   viper.GetString("database.password"),
 		Database:   viper.GetString("database.database"),
 		Collection: viper.GetString("database.collection"),
 	}
 }
 
-func getCredentials(dbConfig DatabaseConfiguration) options.Credential {
+func getCredentials(dbConfig DatabaseConfig) options.Credential {
 	return options.Credential{
-		Username: dbConfig.User,
+		Username: dbConfig.Username,
 		Password: dbConfig.Password,
 	}
 }
 
-func getDatabaseUrl(dbConfig DatabaseConfiguration) string {
+func getDatabaseUrl(dbConfig DatabaseConfig) string {
 	return "mongodb://" + dbConfig.Host + ":" + dbConfig.Port
 }

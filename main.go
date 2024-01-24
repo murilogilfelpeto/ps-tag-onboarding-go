@@ -2,23 +2,26 @@ package main
 
 import (
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/configuration"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/repository"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/router"
-)
-
-var (
-	logger *configuration.Logger
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service"
 )
 
 func main() {
-	logger = configuration.GetLogger("main")
+	appConfig, err := configuration.Init()
+	if err != nil {
+		panic(err)
+	}
+	logger := appConfig.Logger
+
 	logger.Info("Starting application...")
 
-	err := configuration.Init()
-	if err != nil {
-		logger.Errorf("Error initializing application: %v", err)
-		return
-	}
+	userRepository := repository.NewUserRepository(appConfig.Database, "onboarding", "users")
+	userService := service.NewUserService(userRepository)
+	userHandler := handler.NewUserHandler(userService)
+	userRoute := router.NewRouter(userHandler)
+	userRoute.InitServer()
 
-	router.InitServer()
 	logger.Info("Application started successfully")
 }
