@@ -42,7 +42,7 @@ func TestSaveUser(t *testing.T) {
 		createdUser, _ := models.NewUser("f7d2ea4b-a4d0-4103-9c63-55ec7977e4d1", "John", "Doe", "john.doe@email.com", 36)
 		mockService.On("SaveUser", ctx, user).Return(createdUser, nil)
 
-		handler := &handler{
+		handler := &Handler{
 			service: mockService,
 		}
 
@@ -76,7 +76,7 @@ func TestSaveUser(t *testing.T) {
 			Body: io.NopCloser(bytes.NewBuffer(jsonBody)),
 		}
 
-		handler := &handler{
+		handler := &Handler{
 			service: mockService,
 		}
 
@@ -113,7 +113,7 @@ func TestSaveUser(t *testing.T) {
 			Body: io.NopCloser(bytes.NewBuffer(jsonBody)),
 		}
 
-		handler := &handler{
+		handler := &Handler{
 			service: mockService,
 		}
 
@@ -152,7 +152,7 @@ func TestSaveUser(t *testing.T) {
 		user, _ := mapper.UserRequestToUser(requestBody)
 		mockService.On("SaveUser", ctx, user).Return(models.User{}, errors.New("some error"))
 
-		handler := &handler{
+		handler := &Handler{
 			service: mockService,
 		}
 
@@ -185,7 +185,7 @@ func TestFindById(t *testing.T) {
 		user, _ := models.NewUser(id, "John", "Doe", "johndoe@email.com", 18)
 		mockService.On("GetUserById", ctx, id).Return(user, nil)
 
-		handler := &handler{
+		handler := &Handler{
 			service: mockService,
 		}
 
@@ -217,7 +217,7 @@ func TestFindById(t *testing.T) {
 
 		mockService.On("GetUserById", ctx, id).Return(models.User{}, errors.New("some error"))
 
-		handler := &handler{
+		handler := &Handler{
 			service: mockService,
 		}
 
