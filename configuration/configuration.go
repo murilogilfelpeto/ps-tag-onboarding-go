@@ -6,13 +6,12 @@ import (
 )
 
 type AppConfig struct {
-	Logger   *Logger
 	Database *mongo.Client
 	Context  context.Context
 }
 
 func Init() (*AppConfig, error) {
-	logger := NewLogger("configuration")
+	logger := NewLogger()
 	logger.Info("Initializing configuration...")
 
 	err := LoadConfiguration()
@@ -21,7 +20,6 @@ func Init() (*AppConfig, error) {
 		return nil, err
 	}
 	appConfig := &AppConfig{
-		Logger:  logger,
 		Context: context.Background(),
 	}
 

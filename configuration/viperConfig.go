@@ -8,7 +8,7 @@ import (
 )
 
 func LoadConfiguration() error {
-	logger := NewLogger("mongodb")
+	logger := NewLogger()
 	loadEnvironmentVariables()
 	err := viper.ReadInConfig()
 	if err != nil {

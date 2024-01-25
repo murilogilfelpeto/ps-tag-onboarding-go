@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var logger = configuration.NewLogger("userRepository")
+var logger = configuration.NewLogger()
 
 type Repository interface {
 	Save(ctx context.Context, user models.User) (models.User, error)

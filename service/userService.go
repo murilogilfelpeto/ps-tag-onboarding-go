@@ -8,7 +8,7 @@ import (
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models/exceptions"
 )
 
-var logger = configuration.NewLogger("userService")
+var logger = configuration.NewLogger()
 
 type Service interface {
 	SaveUser(ctx context.Context, user models.User) (models.User, error)

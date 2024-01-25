@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-var logger = configuration.NewLogger("router")
+var logger = configuration.NewLogger()
 
 type Router interface {
 	InitServer()
@@ -31,7 +31,8 @@ func NewRouter(handler handler.Handler) Router {
 }
 
 func (r *router) InitServer() {
-	logger = configuration.NewLogger("router")
+	logger = configuration.NewLogger()
+	logger.Infof("Initializing router...")
 	router := gin.Default()
 
 	r.initializeRoutes(router)
@@ -48,18 +49,16 @@ func (r *router) InitServer() {
 		}
 	}()
 
-	// Graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	logger.Info("Shutting down server...")
+	logger.Warn("Shutting down server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		logger.Errorf("Error shutting down server: %v", err)
-		panic(err)
+		logger.Panic("Error shutting down server: %v", err)
 	}
 
 	logger.Info("Server gracefully stopped")

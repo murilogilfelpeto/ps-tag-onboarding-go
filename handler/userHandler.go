@@ -15,7 +15,7 @@ import (
 var (
 	validator       = galidator.New()
 	customValidator = validator.Validator(request.UserRequestDto{})
-	logger          = configuration.NewLogger("userHandler")
+	logger          = configuration.NewLogger()
 )
 
 type Handler struct {

@@ -17,7 +17,7 @@ type DatabaseConfig struct {
 }
 
 func Connect(ctx context.Context) (*mongo.Client, error) {
-	logger := NewLogger("mongodb")
+	logger := NewLogger()
 	logger.Info("Initializing database...")
 
 	dbConfiguration := getDatabaseConfiguration()

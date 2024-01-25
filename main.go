@@ -9,11 +9,13 @@ import (
 )
 
 func main() {
+	logger := configuration.NewLogger()
+	logger.Info("Initializing application...")
+
 	appConfig, err := configuration.Init()
 	if err != nil {
-		panic(err)
+		logger.Fatalf("Error initializing application: %v", err)
 	}
-	logger := appConfig.Logger
 
 	logger.Info("Starting application...")
 
