@@ -20,8 +20,8 @@ import (
 )
 
 func TestSaveUser(t *testing.T) {
+	gin.SetMode(gin.TestMode)
 	t.Run("Persist User", func(t *testing.T) {
-		gin.SetMode(gin.TestMode)
 		recorder := httptest.NewRecorder()
 		ctx, _ := gin.CreateTestContext(recorder)
 		mockService := &mocks.Service{}
@@ -59,7 +59,6 @@ func TestSaveUser(t *testing.T) {
 	})
 
 	t.Run("Error Binding Json all fields", func(t *testing.T) {
-		gin.SetMode(gin.TestMode)
 		recorder := httptest.NewRecorder()
 		ctx, _ := gin.CreateTestContext(recorder)
 		mockService := &mocks.Service{}
@@ -97,7 +96,6 @@ func TestSaveUser(t *testing.T) {
 
 	})
 	t.Run("Error Binding Json nil age and invalid email", func(t *testing.T) {
-		gin.SetMode(gin.TestMode)
 		recorder := httptest.NewRecorder()
 		ctx, _ := gin.CreateTestContext(recorder)
 		mockService := &mocks.Service{}
@@ -132,7 +130,6 @@ func TestSaveUser(t *testing.T) {
 
 	})
 	t.Run("Error persisting user", func(t *testing.T) {
-		gin.SetMode(gin.TestMode)
 		recorder := httptest.NewRecorder()
 		ctx, _ := gin.CreateTestContext(recorder)
 		mockService := &mocks.Service{}
@@ -167,8 +164,8 @@ func TestSaveUser(t *testing.T) {
 }
 
 func TestFindById(t *testing.T) {
+	gin.SetMode(gin.TestMode)
 	t.Run("Find user by id", func(t *testing.T) {
-		gin.SetMode(gin.TestMode)
 		recorder := httptest.NewRecorder()
 		ctx, _ := gin.CreateTestContext(recorder)
 		mockService := &mocks.Service{}
@@ -201,7 +198,6 @@ func TestFindById(t *testing.T) {
 		assert.Equal(t, user.GetAge(), responseBody.Age)
 	})
 	t.Run("Error finding user", func(t *testing.T) {
-		gin.SetMode(gin.TestMode)
 		recorder := httptest.NewRecorder()
 		ctx, _ := gin.CreateTestContext(recorder)
 		mockService := &mocks.Service{}
