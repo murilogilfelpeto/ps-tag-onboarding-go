@@ -21,10 +21,10 @@ type Router interface {
 }
 
 type router struct {
-	handler *handler.Handler
+	handler handler.Handler
 }
 
-func NewRouter(handler *handler.Handler) Router {
+func NewRouter(handler handler.Handler) Router {
 	return &router{
 		handler: handler,
 	}

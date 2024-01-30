@@ -19,11 +19,11 @@ var (
 )
 
 type Handler struct {
-	service *service.Service
+	service service.Service
 }
 
-func NewUserHandler(service *service.Service) *Handler {
-	return &Handler{
+func NewUserHandler(service service.Service) Handler {
+	return Handler{
 		service: service,
 	}
 }
@@ -50,7 +50,7 @@ func (h *Handler) Save(context *gin.Context) {
 			Timestamp: time.Now(),
 			Field:     customValidator.DecryptErrors(err),
 		}
-		context.IndentedJSON(http.StatusUnprocessableEntity, errorResponse)
+		context.IndentedJSON(http.StatusBadRequest, errorResponse)
 		return
 	}
 	user, err := mapper.UserRequestToUser(requestBody)

@@ -13,19 +13,25 @@ import (
 
 var logger = configuration.NewLogger("userRepository")
 
-type Repository struct {
+type Repository interface {
+	Save(ctx context.Context, user models.User) (models.User, error)
+	GetUserById(ctx context.Context, id string) (models.User, error)
+	GetUserByFullName(ctx context.Context, firstName string, lastName string) (models.User, error)
+}
+
+type repository struct {
 	collection *mongo.Collection
 }
 
-func NewUserRepository(client *mongo.Client, dbName string, collectionName string) *Repository {
+func NewUserRepository(client *mongo.Client, dbName string, collectionName string) Repository {
 	db := client.Database(dbName)
 	collection := db.Collection(collectionName)
 
-	return &Repository{
+	return &repository{
 		collection: collection,
 	}
 }
-func (repo *Repository) Save(ctx context.Context, user models.User) (models.User, error) {
+func (repo *repository) Save(ctx context.Context, user models.User) (models.User, error) {
 	logger.Infof("Saving user %s", user.GetFirstName())
 	newUser := mapper.UserToUserEntity(user)
 	_, err := repo.collection.InsertOne(ctx, newUser)
@@ -38,7 +44,7 @@ func (repo *Repository) Save(ctx context.Context, user models.User) (models.User
 	return createdUser, nil
 }
 
-func (repo *Repository) GetUserById(ctx context.Context, id string) (models.User, error) {
+func (repo *repository) GetUserById(ctx context.Context, id string) (models.User, error) {
 	logger.Infof("Getting user by id %s", id)
 	var userEntity entities.UserEntity
 
@@ -58,7 +64,7 @@ func (repo *Repository) GetUserById(ctx context.Context, id string) (models.User
 	return user, nil
 }
 
-func (repo *Repository) GetUserByFullName(ctx context.Context, firstName string, lastName string) (models.User, error) {
+func (repo *repository) GetUserByFullName(ctx context.Context, firstName string, lastName string) (models.User, error) {
 	logger.Infof("Getting user by full name %s %s", firstName, lastName)
 	var userEntity entities.UserEntity
 	err := repo.collection.FindOne(ctx, bson.M{"first_name": firstName, "last_name": lastName}).Decode(&userEntity)
