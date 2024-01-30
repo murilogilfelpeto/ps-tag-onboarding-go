@@ -41,7 +41,7 @@ func validateUser(user *User) error {
 	}
 
 	if user.email == "" {
-		return &exceptions.UserValidationErr{Message: "email is required"}
+		return &exceptions.UserValidationErr{Message: "Email is required"}
 	}
 
 	if user.age < 18 {
