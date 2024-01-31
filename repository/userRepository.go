@@ -3,15 +3,13 @@ package repository
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/configuration"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/repository/entities"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/repository/mapper"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models"
+	logger "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-var logger = configuration.NewLogger()
 
 type Repository interface {
 	Save(ctx context.Context, user models.User) (models.User, error)

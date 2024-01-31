@@ -2,6 +2,7 @@ package configuration
 
 import (
 	"context"
+	logger "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -11,7 +12,6 @@ type AppConfig struct {
 }
 
 func Init() (*AppConfig, error) {
-	logger := NewLogger()
 	logger.Info("Initializing configuration...")
 
 	err := LoadConfiguration()

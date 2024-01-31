@@ -2,13 +2,13 @@ package configuration
 
 import (
 	"errors"
+	logger "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"
 	"strings"
 )
 
 func LoadConfiguration() error {
-	logger := NewLogger()
 	loadEnvironmentVariables()
 	err := viper.ReadInConfig()
 	if err != nil {

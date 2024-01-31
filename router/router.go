@@ -4,16 +4,14 @@ import (
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/configuration"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler"
+	logger "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 )
-
-var logger = configuration.NewLogger()
 
 type Router interface {
 	InitServer()
@@ -31,7 +29,6 @@ func NewRouter(handler handler.Handler) Router {
 }
 
 func (r *router) InitServer() {
-	logger = configuration.NewLogger()
 	logger.Infof("Initializing router...")
 	router := gin.Default()
 

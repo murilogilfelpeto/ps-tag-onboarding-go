@@ -3,11 +3,11 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/golodash/galidator"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/configuration"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler/dto/request"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler/dto/response"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler/mapper"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service"
+	logger "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
 )
@@ -15,7 +15,6 @@ import (
 var (
 	validator       = galidator.New()
 	customValidator = validator.Validator(request.UserRequestDto{})
-	logger          = configuration.NewLogger()
 )
 
 type Handler struct {

@@ -6,18 +6,18 @@ import (
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/repository"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/router"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	logger := configuration.NewLogger()
-	logger.Info("Initializing application...")
+	log.Info("Initializing application...")
 
 	appConfig, err := configuration.Init()
 	if err != nil {
-		logger.Fatalf("Error initializing application: %v", err)
+		log.Fatalf("Error initializing application: %v", err)
 	}
 
-	logger.Info("Starting application...")
+	log.Info("Starting application...")
 
 	userRepository := repository.NewUserRepository(appConfig.Database, "onboarding", "users")
 	userService := service.NewUserService(userRepository)
@@ -25,5 +25,5 @@ func main() {
 	userRoute := router.NewRouter(userHandler)
 	userRoute.InitServer()
 
-	logger.Info("Application started successfully")
+	log.Info("Application started successfully")
 }

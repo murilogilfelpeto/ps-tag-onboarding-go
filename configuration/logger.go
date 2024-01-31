@@ -1,15 +1,12 @@
 package configuration
 
 import (
-	"github.com/sirupsen/logrus"
+	logger "github.com/sirupsen/logrus"
 	"os"
 )
 
-func NewLogger() *logrus.Logger {
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.JSONFormatter{})
+func init() {
+	logger.SetFormatter(&logger.JSONFormatter{})
 	logger.SetOutput(os.Stdout)
 	logger.SetReportCaller(true)
-
-	return logger
 }

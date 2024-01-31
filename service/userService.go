@@ -2,13 +2,11 @@ package service
 
 import (
 	"context"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/configuration"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/repository"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models/exceptions"
+	logger "github.com/sirupsen/logrus"
 )
-
-var logger = configuration.NewLogger()
 
 type Service interface {
 	SaveUser(ctx context.Context, user models.User) (models.User, error)
