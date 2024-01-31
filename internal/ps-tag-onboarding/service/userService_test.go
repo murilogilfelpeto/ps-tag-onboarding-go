@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"errors"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/mocks"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/mocks"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/service/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

@@ -22,6 +22,8 @@ services:
       ME_CONFIG_MONGODB_SERVER: mongodb
   application:
     container_name: onboarding-go
-    build: ../
+    build:
+      context: ../../
+      dockerfile: build/.docker/Dockerfile
     depends_on:
       - mongodb

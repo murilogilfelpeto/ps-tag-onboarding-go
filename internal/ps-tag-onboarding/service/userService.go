@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/repository"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models/exceptions"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/repository"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/service/models"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/service/models/exceptions"
 	logger "github.com/sirupsen/logrus"
 )
 

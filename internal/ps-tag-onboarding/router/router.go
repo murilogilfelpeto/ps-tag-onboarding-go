@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/handler"
 	logger "github.com/sirupsen/logrus"
 	"net/http"
 	"os"

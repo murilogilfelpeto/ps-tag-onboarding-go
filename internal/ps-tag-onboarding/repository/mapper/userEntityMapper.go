@@ -2,8 +2,8 @@ package mapper
 
 import (
 	"github.com/google/uuid"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/repository/entities"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service/models"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/repository/entities"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/service/models"
 )
 
 func UserToUserEntity(user models.User) entities.UserEntity {

@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/configuration"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/handler"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/repository"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/router"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/service"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/handler"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/repository"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/router"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/service"
 	log "github.com/sirupsen/logrus"
 )
 

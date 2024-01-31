@@ -2,6 +2,7 @@ definitions:
   request.UserRequestDto:
     properties:
       age:
+        minimum: 18
         type: integer
       email:
         type: string
@@ -63,6 +64,33 @@ paths:
           schema:
             $ref: '#/definitions/response.ErrorDto'
       summary: Create a new user
+      tags:
+      - Users
+  /users/{id}:
+    get:
+      description: Find user by provided id
+      parameters:
+      - description: User id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User Found successfully
+          schema:
+            $ref: '#/definitions/response.UserResponseDto'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/response.ErrorDto'
+        "422":
+          description: Id in the wrong format
+          schema:
+            $ref: '#/definitions/response.ErrorDto'
+      summary: Find user by id
       tags:
       - Users
 swagger: "2.0"

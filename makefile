@@ -2,7 +2,7 @@
 
 #Variables
 APP_NAME=ps-tag-onboarding-go
-COMPOSE_FILE=.docker/stack.yaml
+COMPOSE_FILE=build/.docker/stack.yaml
 
 # Tasks
 default: run-with-docs
@@ -10,14 +10,14 @@ default: run-with-docs
 run:
 	@docker compose -f $(COMPOSE_FILE) up -d
 run-with-docs:
-	@swag init
+	@swag init --output ./api
 	@docker compose -f $(COMPOSE_FILE) up -d
 build:
 	@go build -o $(APP_NAME) main.go
 test:
 	@go test ./ ...
 docs:
-	@swag init
+	@swag init --output ./api
 stack:
 	@docker compose -f $(COMPOSE_FILE) up -d
 clean:

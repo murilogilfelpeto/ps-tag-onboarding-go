@@ -43,6 +43,47 @@
                     }
                 }
             }
+        },
+        "/users/{id}": {
+            "get": {
+                "description": "Find user by provided id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Find user by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User Found successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.UserResponseDto"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorDto"
+                        }
+                    },
+                    "422": {
+                        "description": "Id in the wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorDto"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -56,7 +97,8 @@
             ],
             "properties": {
                 "age": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 18
                 },
                 "email": {
                     "type": "string"
