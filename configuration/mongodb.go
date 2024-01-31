@@ -2,6 +2,7 @@ package configuration
 
 import (
 	"context"
+	logger "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -17,7 +18,6 @@ type DatabaseConfig struct {
 }
 
 func Connect(ctx context.Context) (*mongo.Client, error) {
-	logger := NewLogger("mongodb")
 	logger.Info("Initializing database...")
 
 	dbConfiguration := getDatabaseConfiguration()

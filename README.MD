@@ -11,6 +11,7 @@ This is the Go version of the [onboarding exercise](https://github.com/wexinc/ps
 - [MongoDB](https://www.mongodb.com/)
 - [Docker](https://www.docker.com/)
 - [Viper](https://github.com/spf13/viper)
+- [Logrus](https://github.com/Sirupsen/logrus)
 
 ## Pre-requisites
 - Docker

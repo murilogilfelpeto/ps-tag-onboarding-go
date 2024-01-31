@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/docs"
+	logger "github.com/sirupsen/logrus"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
