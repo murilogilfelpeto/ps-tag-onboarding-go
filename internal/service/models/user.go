@@ -2,7 +2,7 @@ package models
 
 import (
 	"github.com/google/uuid"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/service/models/exceptions"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models/exceptions"
 )
 
 type User struct {

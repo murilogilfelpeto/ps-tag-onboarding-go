@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/repository/entities"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/repository/mapper"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/service/models"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/repository/entities"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/repository/mapper"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models"
 	logger "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

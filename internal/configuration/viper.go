@@ -25,14 +25,14 @@ func LoadConfiguration() error {
 
 func loadEnvironmentVariables() {
 	environment := os.Getenv("ENVIRONMENT")
+	viper.AddConfigPath("configuration")
 	switch strings.ToUpper(environment) {
 	case "DOCKER-MACOS":
 		viper.SetConfigName("docker-macos")
 		viper.SetConfigType("toml")
-		viper.AddConfigPath("configuration/files")
+
 	default:
 		viper.SetConfigName("local")
 		viper.SetConfigType("toml")
-		viper.AddConfigPath("configuration/files")
 	}
 }

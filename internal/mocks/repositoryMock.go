@@ -2,7 +2,7 @@ package mocks
 
 import (
 	"context"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/service/models"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models"
 	"github.com/stretchr/testify/mock"
 )
 

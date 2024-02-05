@@ -1,9 +1,9 @@
 package mapper
 
 import (
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/handler/dto/request"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/handler/dto/response"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/service/models"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/dto/request"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/dto/response"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models"
 )
 
 func UserRequestToUser(userRequest request.UserRequestDto) (models.User, error) {

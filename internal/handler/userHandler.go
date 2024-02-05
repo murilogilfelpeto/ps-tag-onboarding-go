@@ -3,10 +3,10 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/golodash/galidator"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/handler/dto/request"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/handler/dto/response"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/handler/mapper"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/service"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/dto/request"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/dto/response"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/mapper"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service"
 
 	logger "github.com/sirupsen/logrus"
 	"net/http"

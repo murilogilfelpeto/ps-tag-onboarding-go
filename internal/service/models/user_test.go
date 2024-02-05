@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/ps-tag-onboarding/service/models/exceptions"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models/exceptions"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
