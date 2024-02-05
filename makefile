@@ -10,14 +10,14 @@ default: run-with-docs
 run:
 	@docker compose -f $(COMPOSE_FILE) up -d
 run-with-docs:
-	@swag init -d cmd/ps-tag-onboarding --output ./api
+	@swag init -g cmd/ps-tag-onboarding/main.go --parseInternal --output ./api
 	@docker compose -f $(COMPOSE_FILE) up -d
 build:
 	@go build -o $(APP_NAME) main.go
 test:
 	@go test ./ ...
 docs:
-	@swag init -d cmd/ps-tag-onboarding --output ./api
+	@swag init -g cmd/ps-tag-onboarding/main.go --parseInternal --output ./api
 stack:
 	@docker compose -f $(COMPOSE_FILE) up -d
 clean:
