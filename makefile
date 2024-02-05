@@ -15,7 +15,7 @@ run-with-docs:
 build:
 	@go build -o $(APP_NAME) main.go
 test:
-	@go test ./ ...
+	@go test ./...
 docs:
 	@swag init -g cmd/ps-tag-onboarding/main.go --parseInternal --output ./api
 stack:
