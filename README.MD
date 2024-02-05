@@ -14,8 +14,10 @@ This is the Go version of the [onboarding exercise](https://github.com/wexinc/ps
 - [Logrus](https://github.com/Sirupsen/logrus)
 
 ## Pre-requisites
-- Docker
-- Go
+- [Go](https://golang.org/doc/install)
+- [Docker](https://docs.docker.com/manuals/)
+- [Docker-compose](https://docs.docker.com/compose/)
+- [Swagger](https://github.com/swaggo/gin-swagger)
 
 ## Getting started
 To run the application, make sure you have Docker and Go installed.
