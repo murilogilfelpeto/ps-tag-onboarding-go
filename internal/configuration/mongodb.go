@@ -9,12 +9,12 @@ import (
 )
 
 type DatabaseConfig struct {
-	Host       string
-	Port       string
-	Username   string
-	Password   string
-	Database   string
-	Collection string
+	host       string
+	port       string
+	username   string
+	password   string
+	database   string
+	collection string
 }
 
 func Connect(ctx context.Context) (*mongo.Client, error) {
@@ -42,22 +42,22 @@ func Connect(ctx context.Context) (*mongo.Client, error) {
 
 func getDatabaseConfiguration() DatabaseConfig {
 	return DatabaseConfig{
-		Host:       viper.GetString("database.host"),
-		Port:       viper.GetString("database.port"),
-		Username:   viper.GetString("database.user"),
-		Password:   viper.GetString("database.password"),
-		Database:   viper.GetString("database.database"),
-		Collection: viper.GetString("database.collection"),
+		host:       viper.GetString("database.host"),
+		port:       viper.GetString("database.port"),
+		username:   viper.GetString("database.user"),
+		password:   viper.GetString("database.password"),
+		database:   viper.GetString("database.database"),
+		collection: viper.GetString("database.collection"),
 	}
 }
 
 func getCredentials(dbConfig DatabaseConfig) options.Credential {
 	return options.Credential{
-		Username: dbConfig.Username,
-		Password: dbConfig.Password,
+		Username: dbConfig.username,
+		Password: dbConfig.password,
 	}
 }
 
 func getDatabaseUrl(dbConfig DatabaseConfig) string {
-	return "mongodb://" + dbConfig.Host + ":" + dbConfig.Port
+	return "mongodb://" + dbConfig.host + ":" + dbConfig.port
 }
