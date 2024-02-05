@@ -22,4 +22,4 @@ stack:
 	@docker compose -f $(COMPOSE_FILE) up -d
 clean:
 	@docker compose -f $(COMPOSE_FILE) down
-	@rm -rf ./docs
+	@rm -rf ./api
