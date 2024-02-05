@@ -67,7 +67,7 @@ const docTemplate = `{
                 "summary": "Find user by id",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User id",
                         "name": "id",
                         "in": "path",
@@ -75,12 +75,6 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "User Found successfully",
-                        "schema": {
-                            "$ref": "#/definitions/response.UserResponseDto"
-                        }
-                    },
                     "404": {
                         "description": "User not found",
                         "schema": {

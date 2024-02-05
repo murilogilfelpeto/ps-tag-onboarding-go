@@ -83,8 +83,7 @@ func (h *Handler) Save(context *gin.Context) {
 // @Description Find user by provided id
 // @Tags Users
 // @Produce json
-// @Param id path int true "User id"
-// @Success 201 {object} response.UserResponseDto "User Found successfully"
+// @Param id path string true "User id"
 // @Failure 422 {object} response.ErrorDto "Id in the wrong format"
 // @Failure 404 {object} response.ErrorDto "User not found"
 // @Router /users/{id} [get]
