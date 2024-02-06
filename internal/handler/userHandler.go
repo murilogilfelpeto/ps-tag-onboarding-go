@@ -58,7 +58,7 @@ func (h *Handler) Save(context *gin.Context) {
 	if err != nil {
 		logger.Error("Error while creating user. ", err)
 		errorResponse := response.ErrorDto{
-			Message:   "Error while mapping request to user: " + err.Error(),
+			Message:   "Error while mapping request to user",
 			Timestamp: time.Now(),
 		}
 		context.IndentedJSON(http.StatusUnprocessableEntity, errorResponse)
@@ -68,8 +68,9 @@ func (h *Handler) Save(context *gin.Context) {
 	if err != nil {
 		var databaseConnectionErr *exceptions.DatabaseConnectionErr
 		if errors.As(err, &databaseConnectionErr) {
+			logger.Errorf("Error while connecting to database. %v", err)
 			errorResponse := response.ErrorDto{
-				Message:   err.Error(),
+				Message:   "Something went wrong",
 				Timestamp: time.Now(),
 			}
 			context.IndentedJSON(http.StatusInternalServerError, errorResponse)
@@ -77,7 +78,7 @@ func (h *Handler) Save(context *gin.Context) {
 		}
 		logger.Error("Error while persisting user. ", err)
 		errorResponse := response.ErrorDto{
-			Message:   "Error while creating user. " + err.Error(),
+			Message:   "Error while creating user.",
 			Timestamp: time.Now(),
 		}
 		context.IndentedJSON(http.StatusUnprocessableEntity, errorResponse)
@@ -105,8 +106,9 @@ func (h *Handler) FindById(context *gin.Context) {
 	if err != nil {
 		var databaseConnectionErr *exceptions.DatabaseConnectionErr
 		if errors.As(err, &databaseConnectionErr) {
+			logger.Errorf("Error while connecting to database. %v", err)
 			errorResponse := response.ErrorDto{
-				Message:   err.Error(),
+				Message:   "Something went wrong",
 				Timestamp: time.Now(),
 			}
 			context.IndentedJSON(http.StatusInternalServerError, errorResponse)
@@ -114,7 +116,7 @@ func (h *Handler) FindById(context *gin.Context) {
 		}
 		logger.Errorf("Error while finding user by id %s. %v", id, err)
 		errorResponse := response.ErrorDto{
-			Message:   err.Error(),
+			Message:   "No user found with id " + id,
 			Timestamp: time.Now(),
 		}
 		context.IndentedJSON(http.StatusNotFound, errorResponse)
