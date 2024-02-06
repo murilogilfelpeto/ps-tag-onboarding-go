@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"github.com/google/uuid"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models/exceptions"
 )
@@ -29,23 +30,23 @@ func NewUser(id string, firstName string, lastName string, email string, age int
 
 func validateUser(user *User) error {
 	if user.id != "" && uuid.Validate(user.id) != nil {
-		return &exceptions.UserValidationErr{Message: "Invalid id"}
+		return &exceptions.UserValidationErr{Err: errors.New("Invalid id")}
 	}
 
 	if user.firstName == "" {
-		return &exceptions.UserValidationErr{Message: "First name is required"}
+		return &exceptions.UserValidationErr{Err: errors.New("First name is required")}
 	}
 
 	if user.lastName == "" {
-		return &exceptions.UserValidationErr{Message: "Last name is required"}
+		return &exceptions.UserValidationErr{Err: errors.New("Last name is required")}
 	}
 
 	if user.email == "" {
-		return &exceptions.UserValidationErr{Message: "Email is required"}
+		return &exceptions.UserValidationErr{Err: errors.New("Email is required")}
 	}
 
 	if user.age < 18 {
-		return &exceptions.UserValidationErr{Message: "User must be at least 18 years old"}
+		return &exceptions.UserValidationErr{Err: errors.New("User must be at least 18 years old")}
 	}
 
 	return nil

@@ -1,13 +1,14 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golodash/galidator"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/dto/request"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/dto/response"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/mapper"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service"
-
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models/exceptions"
 	logger "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
@@ -65,6 +66,15 @@ func (h *Handler) Save(context *gin.Context) {
 	}
 	createdUser, err := h.service.SaveUser(context, user)
 	if err != nil {
+		var databaseConnectionErr *exceptions.DatabaseConnectionErr
+		if errors.As(err, &databaseConnectionErr) {
+			errorResponse := response.ErrorDto{
+				Message:   err.Error(),
+				Timestamp: time.Now(),
+			}
+			context.IndentedJSON(http.StatusInternalServerError, errorResponse)
+			return
+		}
 		logger.Error("Error while persisting user. ", err)
 		errorResponse := response.ErrorDto{
 			Message:   "Error while creating user. " + err.Error(),
@@ -84,14 +94,24 @@ func (h *Handler) Save(context *gin.Context) {
 // @Tags Users
 // @Produce json
 // @Param id path string true "User id"
-// @Failure 422 {object} response.ErrorDto "Id in the wrong format"
+// @Failure 422 {object} response.ErrorDto "ID in the wrong format"
 // @Failure 404 {object} response.ErrorDto "User not found"
+// @Failure 500 {object} response.ErrorDto "Failed to connect to database"
 // @Router /users/{id} [get]
 func (h *Handler) FindById(context *gin.Context) {
 	id := context.Param("id")
 	logger.Infof("Finding user by id %s", id)
 	user, err := h.service.GetUserById(context, id)
 	if err != nil {
+		var databaseConnectionErr *exceptions.DatabaseConnectionErr
+		if errors.As(err, &databaseConnectionErr) {
+			errorResponse := response.ErrorDto{
+				Message:   err.Error(),
+				Timestamp: time.Now(),
+			}
+			context.IndentedJSON(http.StatusInternalServerError, errorResponse)
+			return
+		}
 		logger.Errorf("Error while finding user by id %s. %v", id, err)
 		errorResponse := response.ErrorDto{
 			Message:   err.Error(),

@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"github.com/google/uuid"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/repository/entities"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/repository/mapper"
@@ -10,7 +9,6 @@ import (
 	logger "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/topology"
 )
 
 type Repository interface {
@@ -36,10 +34,6 @@ func (repo *repository) Save(ctx context.Context, user models.User) (models.User
 	newUser := mapper.UserToUserEntity(user)
 	_, err := repo.collection.InsertOne(ctx, newUser)
 	if err != nil {
-		var serverSelectionError topology.ServerSelectionError
-		if errors.As(err, &serverSelectionError) {
-			logger.Panicf("Error connecting to database: %v", err)
-		}
 		logger.Errorf("Error saving user %s: %v", user.GetFirstName(), err)
 		return models.User{}, err
 	}
@@ -60,10 +54,6 @@ func (repo *repository) GetUserById(ctx context.Context, id string) (models.User
 
 	err = repo.collection.FindOne(ctx, bson.M{"_id": uid}).Decode(&userEntity)
 	if err != nil {
-		var serverSelectionError topology.ServerSelectionError
-		if errors.As(err, &serverSelectionError) {
-			logger.Panicf("Error connecting to database: %v", err)
-		}
 		logger.Errorf("Error getting user by id %s: %v", id, err)
 		return models.User{}, err
 	}
@@ -77,10 +67,6 @@ func (repo *repository) GetUserByFullName(ctx context.Context, firstName string,
 	var userEntity entities.UserEntity
 	err := repo.collection.FindOne(ctx, bson.M{"first_name": firstName, "last_name": lastName}).Decode(&userEntity)
 	if err != nil {
-		var serverSelectionError topology.ServerSelectionError
-		if errors.As(err, &serverSelectionError) {
-			logger.Panicf("Error connecting to database: %v", err)
-		}
 		logger.Errorf("Error getting user by full name %s %s: %v", firstName, lastName, err)
 		return models.User{}, err
 	}

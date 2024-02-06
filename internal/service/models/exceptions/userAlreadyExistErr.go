@@ -1,9 +1,9 @@
 package exceptions
 
 type UserAlreadyExistErr struct {
-	Message string
+	Err error
 }
 
 func (err *UserAlreadyExistErr) Error() string {
-	return err.Message
+	return err.Err.Error()
 }

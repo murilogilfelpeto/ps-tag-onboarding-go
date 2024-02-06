@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models/exceptions"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -32,7 +33,7 @@ func TestNewUser_WithInvalidData_ShouldFail(t *testing.T) {
 		email := "john.doe@example.com"
 		age := 25
 
-		errMsg := &exceptions.UserValidationErr{Message: "Invalid id"}
+		errMsg := &exceptions.UserValidationErr{Err: errors.New("Invalid id")}
 		user, err := NewUser(id, firstName, lastName, email, age)
 
 		assert.Error(t, err)
@@ -46,7 +47,7 @@ func TestNewUser_WithInvalidData_ShouldFail(t *testing.T) {
 		email := "john.doe@example.com"
 		age := 25
 
-		errMsg := &exceptions.UserValidationErr{Message: "First name is required"}
+		errMsg := &exceptions.UserValidationErr{Err: errors.New("First name is required")}
 		user, err := NewUser(id, firstName, lastName, email, age)
 
 		assert.Error(t, err)
@@ -60,7 +61,7 @@ func TestNewUser_WithInvalidData_ShouldFail(t *testing.T) {
 		email := "john.doe@example.com"
 		age := 25
 
-		errMsg := &exceptions.UserValidationErr{Message: "Last name is required"}
+		errMsg := &exceptions.UserValidationErr{Err: errors.New("Last name is required")}
 		user, err := NewUser(id, firstName, lastName, email, age)
 
 		assert.Error(t, err)
@@ -74,7 +75,7 @@ func TestNewUser_WithInvalidData_ShouldFail(t *testing.T) {
 		email := ""
 		age := 25
 
-		errMsg := &exceptions.UserValidationErr{Message: "Email is required"}
+		errMsg := &exceptions.UserValidationErr{Err: errors.New("Email is required")}
 		user, err := NewUser(id, firstName, lastName, email, age)
 
 		assert.Error(t, err)
@@ -88,7 +89,7 @@ func TestNewUser_WithInvalidData_ShouldFail(t *testing.T) {
 		email := "johhn.doe@email.com"
 		age := 17
 
-		errMsg := &exceptions.UserValidationErr{Message: "User must be at least 18 years old"}
+		errMsg := &exceptions.UserValidationErr{Err: errors.New("User must be at least 18 years old")}
 		user, err := NewUser(id, firstName, lastName, email, age)
 
 		assert.Error(t, err)
@@ -121,7 +122,7 @@ func TestValidateUser_WithInvalidUser_ShouldFail(t *testing.T) {
 			age:       25,
 		}
 
-		errMsg := &exceptions.UserValidationErr{Message: "Invalid id"}
+		errMsg := &exceptions.UserValidationErr{Err: errors.New("Invalid id")}
 		err := validateUser(user)
 
 		assert.Error(t, err)
@@ -136,7 +137,7 @@ func TestValidateUser_WithInvalidUser_ShouldFail(t *testing.T) {
 			age:       25,
 		}
 
-		errMsg := &exceptions.UserValidationErr{Message: "First name is required"}
+		errMsg := &exceptions.UserValidationErr{Err: errors.New("First name is required")}
 		err := validateUser(user)
 
 		assert.Error(t, err)
@@ -151,7 +152,7 @@ func TestValidateUser_WithInvalidUser_ShouldFail(t *testing.T) {
 			age:       25,
 		}
 
-		errMsg := &exceptions.UserValidationErr{Message: "Last name is required"}
+		errMsg := &exceptions.UserValidationErr{Err: errors.New("Last name is required")}
 		err := validateUser(user)
 
 		assert.Error(t, err)
@@ -166,7 +167,7 @@ func TestValidateUser_WithInvalidUser_ShouldFail(t *testing.T) {
 			age:       25,
 		}
 
-		errMsg := &exceptions.UserValidationErr{Message: "Email is required"}
+		errMsg := &exceptions.UserValidationErr{Err: errors.New("Email is required")}
 		err := validateUser(user)
 
 		assert.Error(t, err)
@@ -181,7 +182,7 @@ func TestValidateUser_WithInvalidUser_ShouldFail(t *testing.T) {
 			age:       17,
 		}
 
-		errMsg := &exceptions.UserValidationErr{Message: "User must be at least 18 years old"}
+		errMsg := &exceptions.UserValidationErr{Err: errors.New("User must be at least 18 years old")}
 		err := validateUser(user)
 
 		assert.Error(t, err)

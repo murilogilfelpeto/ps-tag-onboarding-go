@@ -1,9 +1,9 @@
 package exceptions
 
 type UserNotFoundErr struct {
-	Message string
+	Err error
 }
 
 func (err *UserNotFoundErr) Error() string {
-	return err.Message
+	return err.Err.Error()
 }
