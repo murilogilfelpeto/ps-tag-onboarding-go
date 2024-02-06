@@ -13,6 +13,9 @@ This is the Go version of the [onboarding exercise](https://github.com/wexinc/ps
 - [Viper](https://github.com/spf13/viper)
 - [Logrus](https://github.com/Sirupsen/logrus)
 
+## Technical Proposal
+-[Swagger](https://docs.google.com/document/d/1K1WaCZhHi35BbvQ7UAGWOlJeGBoIlLVXpW7EQ8ryFdw/edit?usp=share_link)
+
 ## Pre-requisites
 - [Go](https://golang.org/doc/install)
 - [Docker](https://docs.docker.com/manuals/)
