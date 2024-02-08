@@ -65,7 +65,7 @@ func (h *Handler) Save(context *gin.Context) {
 		return
 	}
 	createdUser, err := h.service.SaveUser(context, user)
-	if err != nil {
+	if createdUser == nil {
 		var databaseConnectionErr *exceptions.DatabaseConnectionErr
 		if errors.As(err, &databaseConnectionErr) {
 			logger.Errorf("Error while connecting to database. %v", err)
@@ -103,7 +103,7 @@ func (h *Handler) FindById(context *gin.Context) {
 	id := context.Param("id")
 	logger.Infof("Finding user by id %s", id)
 	user, err := h.service.GetUserById(context, id)
-	if err != nil {
+	if user == nil {
 		var databaseConnectionErr *exceptions.DatabaseConnectionErr
 		if errors.As(err, &databaseConnectionErr) {
 			logger.Errorf("Error while connecting to database. %v", err)
