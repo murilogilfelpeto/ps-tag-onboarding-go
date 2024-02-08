@@ -6,6 +6,7 @@ import (
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/mocks"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models"
 	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/mongo"
 	"testing"
 )
 
@@ -15,8 +16,9 @@ func TestSaveUser(t *testing.T) {
 
 		user, _ := models.NewUser("f7d2ea4b-a4d0-4103-9c63-55ec7977e4d1", "John", "Doe", "john.doe@email.com", 36)
 
-		mockRepo.On("GetUserByFullName", context.Background(), user.GetFirstName(), user.GetLastName()).Return(models.User{}, nil)
-		mockRepo.On("Save", context.Background(), user).Return(user, nil)
+		mongo.ErrNoDocuments = errors.New("no documents")
+		mockRepo.On("GetUserByFullName", context.Background(), user.GetFirstName(), user.GetLastName()).Return(nil, mongo.ErrNoDocuments)
+		mockRepo.On("Save", context.Background(), user).Return(&user, nil)
 
 		srv := &service{
 			repository: mockRepo,
@@ -24,8 +26,10 @@ func TestSaveUser(t *testing.T) {
 
 		createdUser, err := srv.SaveUser(context.Background(), user)
 		assert.NoError(t, err)
-		assert.Equal(t, user, createdUser)
+		assert.Equal(t, user, *createdUser)
 		mockRepo.AssertExpectations(t)
+		mockRepo.AssertNumberOfCalls(t, "GetUserByFullName", 1)
+		mockRepo.AssertNumberOfCalls(t, "Save", 1)
 	})
 
 	// Test when user already exists in the repository
@@ -34,7 +38,7 @@ func TestSaveUser(t *testing.T) {
 
 		user, _ := models.NewUser("f7d2ea4b-a4d0-4103-9c63-55ec7977e4d1", "John", "Doe", "john.doe@email.com", 36)
 
-		mockRepo.On("GetUserByFullName", context.Background(), user.GetFirstName(), user.GetLastName()).Return(user, nil)
+		mockRepo.On("GetUserByFullName", context.Background(), user.GetFirstName(), user.GetLastName()).Return(&user, nil)
 
 		srv := &service{
 			repository: mockRepo,
@@ -42,8 +46,10 @@ func TestSaveUser(t *testing.T) {
 
 		createdUser, err := srv.SaveUser(context.Background(), user)
 		assert.Error(t, err)
-		assert.Equal(t, models.User{}, createdUser)
+		assert.Nil(t, createdUser)
 		mockRepo.AssertExpectations(t)
+		mockRepo.AssertNumberOfCalls(t, "GetUserByFullName", 1)
+		mockRepo.AssertNumberOfCalls(t, "Save", 0)
 	})
 
 	// Test when there is an error persisting the user
@@ -52,8 +58,9 @@ func TestSaveUser(t *testing.T) {
 
 		user, _ := models.NewUser("f7d2ea4b-a4d0-4103-9c63-55ec7977e4d1", "John", "Doe", "john.doe@email.com", 36)
 
-		mockRepo.On("GetUserByFullName", context.Background(), user.GetFirstName(), user.GetLastName()).Return(models.User{}, nil)
-		mockRepo.On("Save", context.Background(), user).Return(models.User{}, errors.New("some error"))
+		mongo.ErrNoDocuments = errors.New("no documents")
+		mockRepo.On("GetUserByFullName", context.Background(), user.GetFirstName(), user.GetLastName()).Return(nil, mongo.ErrNoDocuments)
+		mockRepo.On("Save", context.Background(), user).Return(nil, errors.New("some error"))
 
 		srv := &service{
 			repository: mockRepo,
@@ -61,8 +68,10 @@ func TestSaveUser(t *testing.T) {
 
 		createdUser, err := srv.SaveUser(context.Background(), user)
 		assert.Error(t, err)
-		assert.Equal(t, models.User{}, createdUser)
+		assert.Nil(t, createdUser)
 		mockRepo.AssertExpectations(t)
+		mockRepo.AssertNumberOfCalls(t, "GetUserByFullName", 1)
+		mockRepo.AssertNumberOfCalls(t, "Save", 1)
 	})
 }
 
@@ -73,7 +82,7 @@ func TestGetUserById(t *testing.T) {
 		id := "f7d2ea4b-a4d0-4103-9c63-55ec7977e4d1"
 		mockUser, _ := models.NewUser("f7d2ea4b-a4d0-4103-9c63-55ec7977e4d1", "John", "Doe", "john.doe@email.com", 36)
 
-		mockRepo.On("GetUserById", context.Background(), id).Return(mockUser, nil)
+		mockRepo.On("GetUserById", context.Background(), id).Return(&mockUser, nil)
 
 		srv := &service{
 			repository: mockRepo,
@@ -81,8 +90,11 @@ func TestGetUserById(t *testing.T) {
 
 		user, err := srv.GetUserById(context.Background(), id)
 		assert.NoError(t, err)
-		assert.Equal(t, mockUser, user)
+		assert.Equal(t, mockUser, *user)
 		mockRepo.AssertExpectations(t)
+		mockRepo.AssertNumberOfCalls(t, "GetUserById", 1)
+		mockRepo.AssertNumberOfCalls(t, "Save", 0)
+		mockRepo.AssertNumberOfCalls(t, "GetUserByFullName", 0)
 	})
 
 	t.Run("User not found", func(t *testing.T) {
@@ -90,7 +102,7 @@ func TestGetUserById(t *testing.T) {
 
 		id := "59ddb747-9767-4c1f-81b4-054877caf06d"
 
-		mockRepo.On("GetUserById", context.Background(), id).Return(models.User{}, errors.New("some error"))
+		mockRepo.On("GetUserById", context.Background(), id).Return(nil, errors.New("some error"))
 
 		srv := &service{
 			repository: mockRepo,
@@ -98,7 +110,10 @@ func TestGetUserById(t *testing.T) {
 
 		user, err := srv.GetUserById(context.Background(), id)
 		assert.Error(t, err)
-		assert.Equal(t, models.User{}, user)
+		assert.Nil(t, user)
 		mockRepo.AssertExpectations(t)
+		mockRepo.AssertNumberOfCalls(t, "GetUserById", 1)
+		mockRepo.AssertNumberOfCalls(t, "Save", 0)
+		mockRepo.AssertNumberOfCalls(t, "GetUserByFullName", 0)
 	})
 }

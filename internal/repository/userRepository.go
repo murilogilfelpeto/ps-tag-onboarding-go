@@ -12,9 +12,9 @@ import (
 )
 
 type Repository interface {
-	Save(ctx context.Context, user models.User) (models.User, error)
-	GetUserById(ctx context.Context, id string) (models.User, error)
-	GetUserByFullName(ctx context.Context, firstName string, lastName string) (models.User, error)
+	Save(ctx context.Context, user models.User) (*models.User, error)
+	GetUserById(ctx context.Context, id string) (*models.User, error)
+	GetUserByFullName(ctx context.Context, firstName string, lastName string) (*models.User, error)
 }
 
 type repository struct {
@@ -29,48 +29,48 @@ func NewUserRepository(client *mongo.Client, dbName string, collectionName strin
 		collection: collection,
 	}
 }
-func (repo *repository) Save(ctx context.Context, user models.User) (models.User, error) {
+func (repo *repository) Save(ctx context.Context, user models.User) (*models.User, error) {
 	logger.Infof("Saving user %s", user.GetFirstName())
 	newUser := mapper.UserToUserEntity(user)
 	_, err := repo.collection.InsertOne(ctx, newUser)
 	if err != nil {
 		logger.Errorf("Error saving user %s: %v", user.GetFirstName(), err)
-		return models.User{}, err
+		return nil, err
 	}
 	logger.Infof("User %s saved successfully", user.GetFirstName())
 	createdUser, err := mapper.UserEntityToUser(newUser)
-	return createdUser, nil
+	return &createdUser, nil
 }
 
-func (repo *repository) GetUserById(ctx context.Context, id string) (models.User, error) {
+func (repo *repository) GetUserById(ctx context.Context, id string) (*models.User, error) {
 	logger.Infof("Getting user by id %s", id)
 	var userEntity entities.UserEntity
 
 	uid, err := uuid.Parse(id)
 	if err != nil {
 		logger.Errorf("Error parsing user id %s: %v", id, err)
-		return models.User{}, err
+		return nil, err
 	}
 
 	err = repo.collection.FindOne(ctx, bson.M{"_id": uid}).Decode(&userEntity)
 	if err != nil {
 		logger.Errorf("Error getting user by id %s: %v", id, err)
-		return models.User{}, err
+		return nil, err
 	}
 	logger.Infof("User %s found successfully", id)
 	user, err := mapper.UserEntityToUser(userEntity)
-	return user, nil
+	return &user, nil
 }
 
-func (repo *repository) GetUserByFullName(ctx context.Context, firstName string, lastName string) (models.User, error) {
+func (repo *repository) GetUserByFullName(ctx context.Context, firstName string, lastName string) (*models.User, error) {
 	logger.Infof("Getting user by full name %s %s", firstName, lastName)
 	var userEntity entities.UserEntity
 	err := repo.collection.FindOne(ctx, bson.M{"first_name": firstName, "last_name": lastName}).Decode(&userEntity)
 	if err != nil {
 		logger.Errorf("Error getting user by full name %s %s: %v", firstName, lastName, err)
-		return models.User{}, err
+		return nil, err
 	}
 	logger.Infof("User %s %s found successfully", firstName, lastName)
 	user, _ := mapper.UserEntityToUser(userEntity)
-	return user, nil
+	return &user, nil
 }

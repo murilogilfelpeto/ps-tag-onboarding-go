@@ -85,7 +85,7 @@ func (h *Handler) Save(context *gin.Context) {
 		return
 	}
 
-	responseBody := mapper.UserToUserResponseDto(createdUser)
+	responseBody := mapper.UserToUserResponseDto(*createdUser)
 	context.IndentedJSON(http.StatusCreated, responseBody)
 }
 
@@ -122,6 +122,6 @@ func (h *Handler) FindById(context *gin.Context) {
 		context.IndentedJSON(http.StatusNotFound, errorResponse)
 		return
 	}
-	responseBody := mapper.UserToUserResponseDto(user)
+	responseBody := mapper.UserToUserResponseDto(*user)
 	context.IndentedJSON(http.StatusOK, responseBody)
 }

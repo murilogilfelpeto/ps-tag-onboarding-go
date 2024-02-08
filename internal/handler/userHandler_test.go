@@ -40,7 +40,7 @@ func TestSaveUser(t *testing.T) {
 
 		user, _ := mapper.UserRequestToUser(requestBody)
 		createdUser, _ := models.NewUser("f7d2ea4b-a4d0-4103-9c63-55ec7977e4d1", "John", "Doe", "john.doe@email.com", 36)
-		mockService.On("SaveUser", ctx, user).Return(createdUser, nil)
+		mockService.On("SaveUser", ctx, user).Return(&createdUser, nil)
 
 		handler := &Handler{
 			service: mockService,
@@ -56,6 +56,9 @@ func TestSaveUser(t *testing.T) {
 		assert.Equal(t, createdUser.GetLastName(), responseBody.LastName)
 		assert.Equal(t, createdUser.GetEmail(), responseBody.Email)
 		assert.Equal(t, createdUser.GetAge(), responseBody.Age)
+		mockService.AssertExpectations(t)
+		mockService.AssertNumberOfCalls(t, "SaveUser", 1)
+		mockService.AssertNumberOfCalls(t, "GetUserById", 0)
 	})
 
 	t.Run("Error Binding Json all fields", func(t *testing.T) {
@@ -93,6 +96,8 @@ func TestSaveUser(t *testing.T) {
 		assert.Equal(t, "required", fields["lastName"])
 		assert.Equal(t, "required", fields["email"])
 		assert.Equal(t, "age must be greater than 18", fields["age"])
+		mockService.AssertNumberOfCalls(t, "SaveUser", 0)
+		mockService.AssertNumberOfCalls(t, "GetUserById", 0)
 
 	})
 	t.Run("Error Binding Json nil age and invalid email", func(t *testing.T) {
@@ -127,6 +132,8 @@ func TestSaveUser(t *testing.T) {
 		fields, _ := convertToMap(responseBody.Field)
 		assert.Equal(t, "not a valid email address", fields["email"])
 		assert.Equal(t, "required", fields["age"])
+		mockService.AssertNumberOfCalls(t, "SaveUser", 0)
+		mockService.AssertNumberOfCalls(t, "GetUserById", 0)
 
 	})
 	t.Run("Error persisting user", func(t *testing.T) {
@@ -147,7 +154,7 @@ func TestSaveUser(t *testing.T) {
 		}
 
 		user, _ := mapper.UserRequestToUser(requestBody)
-		mockService.On("SaveUser", ctx, user).Return(models.User{}, errors.New("some error"))
+		mockService.On("SaveUser", ctx, user).Return(nil, errors.New("some error"))
 
 		handler := &Handler{
 			service: mockService,
@@ -157,9 +164,12 @@ func TestSaveUser(t *testing.T) {
 		var responseBody response.ErrorDto
 		_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
 		assert.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
-		assert.Equal(t, "Error while creating user. some error", responseBody.Message)
+		assert.Equal(t, "Error while creating user.", responseBody.Message)
 		assert.NotEmpty(t, responseBody.Timestamp)
 		assert.Nil(t, responseBody.Field)
+		mockService.AssertExpectations(t)
+		mockService.AssertNumberOfCalls(t, "SaveUser", 1)
+		mockService.AssertNumberOfCalls(t, "GetUserById", 0)
 	})
 }
 
@@ -180,7 +190,7 @@ func TestFindById(t *testing.T) {
 		ctx.Params = pathParam
 
 		user, _ := models.NewUser(id, "John", "Doe", "johndoe@email.com", 18)
-		mockService.On("GetUserById", ctx, id).Return(user, nil)
+		mockService.On("GetUserById", ctx, id).Return(&user, nil)
 
 		handler := &Handler{
 			service: mockService,
@@ -196,6 +206,9 @@ func TestFindById(t *testing.T) {
 		assert.Equal(t, user.GetLastName(), responseBody.LastName)
 		assert.Equal(t, user.GetEmail(), responseBody.Email)
 		assert.Equal(t, user.GetAge(), responseBody.Age)
+		mockService.AssertExpectations(t)
+		mockService.AssertNumberOfCalls(t, "GetUserById", 1)
+		mockService.AssertNumberOfCalls(t, "SaveUser", 0)
 	})
 	t.Run("Error finding user", func(t *testing.T) {
 		recorder := httptest.NewRecorder()
@@ -211,7 +224,7 @@ func TestFindById(t *testing.T) {
 		}
 		ctx.Params = pathParam
 
-		mockService.On("GetUserById", ctx, id).Return(models.User{}, errors.New("some error"))
+		mockService.On("GetUserById", ctx, id).Return(nil, errors.New("some error"))
 
 		handler := &Handler{
 			service: mockService,
@@ -220,10 +233,14 @@ func TestFindById(t *testing.T) {
 		handler.FindById(ctx)
 		var responseBody response.ErrorDto
 		_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
+		errorMessage := "No user found with id " + id
 		assert.Equal(t, http.StatusNotFound, recorder.Code)
-		assert.Equal(t, "some error", responseBody.Message)
+		assert.Equal(t, errorMessage, responseBody.Message)
 		assert.NotEmpty(t, responseBody.Timestamp)
 		assert.Nil(t, responseBody.Field)
+		mockService.AssertExpectations(t)
+		mockService.AssertNumberOfCalls(t, "GetUserById", 1)
+		mockService.AssertNumberOfCalls(t, "SaveUser", 0)
 	})
 }
 
