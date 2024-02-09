@@ -55,7 +55,7 @@ func (repo *repository) GetUserById(ctx context.Context, id string) (*models.Use
 
 	err = repo.collection.FindOne(ctx, bson.M{"_id": uid}).Decode(&userEntity)
 	if err != nil {
-		if errors.As(err, &mongo.ErrNoDocuments) {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			logger.Infof("User %s not found", id)
 			return nil, nil
 		}
@@ -72,7 +72,7 @@ func (repo *repository) GetUserByFullName(ctx context.Context, firstName string,
 	var userEntity entities.UserEntity
 	err := repo.collection.FindOne(ctx, bson.M{"first_name": firstName, "last_name": lastName}).Decode(&userEntity)
 	if err != nil {
-		if errors.As(err, &mongo.ErrNoDocuments) {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			logger.Infof("User %s %s not found", firstName, lastName)
 			return nil, nil
 		}

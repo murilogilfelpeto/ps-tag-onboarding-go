@@ -39,7 +39,7 @@ func (srv *service) SaveUser(ctx context.Context, user models.User) (*models.Use
 	createdUser, err := srv.repository.Save(ctx, user)
 	if err != nil {
 		var serverSelectionError topology.ServerSelectionError
-		if errors.As(err, &serverSelectionError) {
+		if errors.Is(err, &serverSelectionError) {
 			logger.Errorf("Something went wrong: %v", err)
 			return nil, &exceptions.DatabaseError{Err: errors.New("something went wrong")}
 		}
