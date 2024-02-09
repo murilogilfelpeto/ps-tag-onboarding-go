@@ -114,7 +114,7 @@ func (h *Handler) FindById(context *gin.Context) {
 			context.IndentedJSON(http.StatusInternalServerError, errorResponse)
 			return
 		}
-		logger.Errorf("Error while finding user by id %s. %v", id, err)
+		logger.Errorf("Error while finding user by id %s.", id)
 		errorResponse := response.ErrorDto{
 			Message:   "No user found with id " + id,
 			Timestamp: time.Now(),
