@@ -29,18 +29,19 @@ func (srv *service) SaveUser(ctx context.Context, user models.User) (*models.Use
 	logger.Infof("Saving user %s", user.GetFullName())
 	userByFullName, err := srv.repository.GetUserByFullName(ctx, user.GetFirstName(), user.GetLastName())
 	if userByFullName != nil {
-		var serverSelectionError topology.ServerSelectionError
-		if errors.As(err, &serverSelectionError) {
-			return nil, &exceptions.DatabaseConnectionErr{Err: errors.New("Something went wrong: " + err.Error())}
+		if err == nil {
+			logger.Errorf("User already exists: %v", user.GetFullName())
+			return nil, nil
 		}
-		logger.Errorf("User already exists: %v", user.GetFullName())
-		return nil, &exceptions.UserAlreadyExistErr{Err: errors.New("User already exists: " + user.GetFullName())}
+		logger.Errorf("Something went wrong: %v", err)
+		return nil, &exceptions.DatabaseError{Err: errors.New("something went wrong")}
 	}
 	createdUser, err := srv.repository.Save(ctx, user)
 	if err != nil {
 		var serverSelectionError topology.ServerSelectionError
 		if errors.As(err, &serverSelectionError) {
-			return nil, &exceptions.DatabaseConnectionErr{Err: errors.New("Something went wrong: " + err.Error())}
+			logger.Errorf("Something went wrong: %v", err)
+			return nil, &exceptions.DatabaseError{Err: errors.New("something went wrong")}
 		}
 		logger.Errorf("Error persisting user: %v", err)
 		return nil, &exceptions.UserValidationErr{Err: errors.New("Error persisting user: " + user.GetFullName())}
@@ -52,13 +53,13 @@ func (srv *service) SaveUser(ctx context.Context, user models.User) (*models.Use
 func (srv *service) GetUserById(ctx context.Context, id string) (*models.User, error) {
 	logger.Infof("Getting user by id %s", id)
 	user, err := srv.repository.GetUserById(ctx, id)
-	if err != nil {
-		var serverSelectionError topology.ServerSelectionError
-		if errors.As(err, &serverSelectionError) {
-			return nil, &exceptions.DatabaseConnectionErr{Err: errors.New("Something went wrong: " + err.Error())}
+	if user == nil {
+		if err == nil {
+			logger.Errorf("Error finding user: %v", err)
+			return nil, nil
 		}
-		logger.Errorf("Error finding user: %v", err)
-		return nil, &exceptions.UserNotFoundErr{Err: errors.New("User not found: " + id)}
+		logger.Errorf("Something went wrong: %v", err)
+		return nil, &exceptions.DatabaseError{Err: errors.New("something went wrong")}
 	}
 	logger.Infof("User %s found successfully", id)
 	return user, nil

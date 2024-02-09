@@ -56,7 +56,7 @@ func (h *Handler) Save(context *gin.Context) {
 	}
 	user, err := mapper.UserRequestToUser(requestBody)
 	if err != nil {
-		logger.Error("Error while creating user. ", err)
+		logger.Error("Error while mapping request to user. ", err)
 		errorResponse := response.ErrorDto{
 			Message:   "Error while mapping request to user",
 			Timestamp: time.Now(),
@@ -66,8 +66,8 @@ func (h *Handler) Save(context *gin.Context) {
 	}
 	createdUser, err := h.service.SaveUser(context, user)
 	if createdUser == nil {
-		var databaseConnectionErr *exceptions.DatabaseConnectionErr
-		if errors.As(err, &databaseConnectionErr) {
+		var databaseError *exceptions.DatabaseError
+		if errors.As(err, &databaseError) {
 			logger.Errorf("Error while connecting to database. %v", err)
 			errorResponse := response.ErrorDto{
 				Message:   "Something went wrong",
@@ -104,8 +104,8 @@ func (h *Handler) FindById(context *gin.Context) {
 	logger.Infof("Finding user by id %s", id)
 	user, err := h.service.GetUserById(context, id)
 	if user == nil {
-		var databaseConnectionErr *exceptions.DatabaseConnectionErr
-		if errors.As(err, &databaseConnectionErr) {
+		var databaseError *exceptions.DatabaseError
+		if errors.As(err, &databaseError) {
 			logger.Errorf("Error while connecting to database. %v", err)
 			errorResponse := response.ErrorDto{
 				Message:   "Something went wrong",

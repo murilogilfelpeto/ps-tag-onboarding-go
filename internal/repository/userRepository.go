@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"github.com/google/uuid"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/repository/entities"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/repository/mapper"
@@ -54,6 +55,10 @@ func (repo *repository) GetUserById(ctx context.Context, id string) (*models.Use
 
 	err = repo.collection.FindOne(ctx, bson.M{"_id": uid}).Decode(&userEntity)
 	if err != nil {
+		if errors.As(err, &mongo.ErrNoDocuments) {
+			logger.Infof("User %s not found", id)
+			return nil, nil
+		}
 		logger.Errorf("Error getting user by id %s: %v", id, err)
 		return nil, err
 	}
@@ -67,6 +72,10 @@ func (repo *repository) GetUserByFullName(ctx context.Context, firstName string,
 	var userEntity entities.UserEntity
 	err := repo.collection.FindOne(ctx, bson.M{"first_name": firstName, "last_name": lastName}).Decode(&userEntity)
 	if err != nil {
+		if errors.As(err, &mongo.ErrNoDocuments) {
+			logger.Infof("User %s %s not found", firstName, lastName)
+			return nil, nil
+		}
 		logger.Errorf("Error getting user by full name %s %s: %v", firstName, lastName, err)
 		return nil, err
 	}

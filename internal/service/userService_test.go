@@ -45,7 +45,7 @@ func TestSaveUser(t *testing.T) {
 		}
 
 		createdUser, err := srv.SaveUser(context.Background(), user)
-		assert.Error(t, err)
+		assert.Nil(t, err)
 		assert.Nil(t, createdUser)
 		mockRepo.AssertExpectations(t)
 		mockRepo.AssertNumberOfCalls(t, "GetUserByFullName", 1)
@@ -98,6 +98,26 @@ func TestGetUserById(t *testing.T) {
 	})
 
 	t.Run("User not found", func(t *testing.T) {
+		mockRepo := &mocks.Repository{}
+
+		id := "59ddb747-9767-4c1f-81b4-054877caf06d"
+
+		mockRepo.On("GetUserById", context.Background(), id).Return(nil, nil)
+
+		srv := &service{
+			repository: mockRepo,
+		}
+
+		user, err := srv.GetUserById(context.Background(), id)
+		assert.Nil(t, err)
+		assert.Nil(t, user)
+		mockRepo.AssertExpectations(t)
+		mockRepo.AssertNumberOfCalls(t, "GetUserById", 1)
+		mockRepo.AssertNumberOfCalls(t, "Save", 0)
+		mockRepo.AssertNumberOfCalls(t, "GetUserByFullName", 0)
+	})
+
+	t.Run("Database error", func(t *testing.T) {
 		mockRepo := &mocks.Repository{}
 
 		id := "59ddb747-9767-4c1f-81b4-054877caf06d"
