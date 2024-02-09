@@ -1,0 +1,20 @@
+with-expecter: true
+# create tests in different package then the mocked interface.
+# We do this to avoid confusion with existing manually created mocks.
+inpackage: False
+# Put all mocks in the mockery directory to make it clear they are not manually created
+dir: "internal/mocks"
+mockname: "{{.InterfaceName}}"
+outpkg: "mocks"
+filename: "mock_{{.InterfaceName}}.go"
+packages:
+  github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/repository:
+    config:
+      recursive: true
+    interfaces:
+      Repository:
+  github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service:
+    config:
+      recursive: true
+    interfaces:
+      Service:
