@@ -25,23 +25,26 @@ func NewUserService(repository repository.Repository) Service {
 	}
 }
 
+const errorMessage = "something went wrong"
+
 func (srv *service) SaveUser(ctx context.Context, user models.User) (*models.User, error) {
 	logger.Infof("Saving user %s", user.GetFullName())
 	userByFullName, err := srv.repository.GetUserByFullName(ctx, user.GetFirstName(), user.GetLastName())
+
 	if userByFullName != nil {
 		if err == nil {
 			logger.Errorf("User already exists: %v", user.GetFullName())
 			return nil, nil
 		}
 		logger.Errorf("Something went wrong: %v", err)
-		return nil, &exceptions.DatabaseError{Err: errors.New("something went wrong")}
+		return nil, &exceptions.DatabaseError{Err: errors.New(errorMessage)}
 	}
 	createdUser, err := srv.repository.Save(ctx, user)
 	if err != nil {
 		var serverSelectionError topology.ServerSelectionError
 		if errors.Is(err, &serverSelectionError) {
 			logger.Errorf("Something went wrong: %v", err)
-			return nil, &exceptions.DatabaseError{Err: errors.New("something went wrong")}
+			return nil, &exceptions.DatabaseError{Err: errors.New(errorMessage)}
 		}
 		logger.Errorf("Error persisting user: %v", err)
 		return nil, &exceptions.UserValidationErr{Err: errors.New("Error persisting user: " + user.GetFullName())}
@@ -59,7 +62,7 @@ func (srv *service) GetUserById(ctx context.Context, id string) (*models.User, e
 			return nil, nil
 		}
 		logger.Errorf("Something went wrong: %v", err)
-		return nil, &exceptions.DatabaseError{Err: errors.New("something went wrong")}
+		return nil, &exceptions.DatabaseError{Err: errors.New(errorMessage)}
 	}
 	logger.Infof("User %s found successfully", id)
 	return user, nil
