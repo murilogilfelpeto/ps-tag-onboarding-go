@@ -40,7 +40,7 @@ func TestSaveUser(t *testing.T) {
 
 		user, _ := mapper.UserRequestToUser(requestBody)
 		createdUser, _ := models.NewUser("f7d2ea4b-a4d0-4103-9c63-55ec7977e4d1", "John", "Doe", "john.doe@email.com", 36)
-		mockService.On("SaveUser", ctx, user).Return(&createdUser, nil)
+		mockService.EXPECT().SaveUser(ctx, user).Return(&createdUser, nil).Once()
 
 		handler := &Handler{
 			service: mockService,
@@ -57,7 +57,6 @@ func TestSaveUser(t *testing.T) {
 		assert.Equal(t, createdUser.GetEmail(), responseBody.Email)
 		assert.Equal(t, createdUser.GetAge(), responseBody.Age)
 		mockService.AssertExpectations(t)
-		mockService.AssertNumberOfCalls(t, "SaveUser", 1)
 		mockService.AssertNumberOfCalls(t, "GetUserById", 0)
 	})
 
@@ -154,7 +153,7 @@ func TestSaveUser(t *testing.T) {
 		}
 
 		user, _ := mapper.UserRequestToUser(requestBody)
-		mockService.On("SaveUser", ctx, user).Return(nil, errors.New("some error"))
+		mockService.EXPECT().SaveUser(ctx, user).Return(nil, errors.New("some error")).Once()
 
 		handler := &Handler{
 			service: mockService,
@@ -168,7 +167,6 @@ func TestSaveUser(t *testing.T) {
 		assert.NotEmpty(t, responseBody.Timestamp)
 		assert.Nil(t, responseBody.Field)
 		mockService.AssertExpectations(t)
-		mockService.AssertNumberOfCalls(t, "SaveUser", 1)
 		mockService.AssertNumberOfCalls(t, "GetUserById", 0)
 	})
 }
@@ -190,7 +188,7 @@ func TestFindById(t *testing.T) {
 		ctx.Params = pathParam
 
 		user, _ := models.NewUser(id, "John", "Doe", "johndoe@email.com", 18)
-		mockService.On("GetUserById", ctx, id).Return(&user, nil)
+		mockService.EXPECT().GetUserById(ctx, id).Return(&user, nil).Once()
 
 		handler := &Handler{
 			service: mockService,
@@ -207,7 +205,6 @@ func TestFindById(t *testing.T) {
 		assert.Equal(t, user.GetEmail(), responseBody.Email)
 		assert.Equal(t, user.GetAge(), responseBody.Age)
 		mockService.AssertExpectations(t)
-		mockService.AssertNumberOfCalls(t, "GetUserById", 1)
 		mockService.AssertNumberOfCalls(t, "SaveUser", 0)
 	})
 	t.Run("Error finding user", func(t *testing.T) {
@@ -224,7 +221,7 @@ func TestFindById(t *testing.T) {
 		}
 		ctx.Params = pathParam
 
-		mockService.On("GetUserById", ctx, id).Return(nil, errors.New("some error"))
+		mockService.EXPECT().GetUserById(ctx, id).Return(nil, errors.New("some error")).Once()
 
 		handler := &Handler{
 			service: mockService,
@@ -239,7 +236,6 @@ func TestFindById(t *testing.T) {
 		assert.NotEmpty(t, responseBody.Timestamp)
 		assert.Nil(t, responseBody.Field)
 		mockService.AssertExpectations(t)
-		mockService.AssertNumberOfCalls(t, "GetUserById", 1)
 		mockService.AssertNumberOfCalls(t, "SaveUser", 0)
 	})
 }
