@@ -1,14 +1,12 @@
 package handler
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golodash/galidator"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/dto/request"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/dto/response"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/mapper"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models/exceptions"
 	logger "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
@@ -65,17 +63,18 @@ func (h *Handler) Save(context *gin.Context) {
 		return
 	}
 	createdUser, err := h.service.SaveUser(context, user)
-	if createdUser == nil {
-		var databaseError *exceptions.DatabaseError
-		if errors.As(err, &databaseError) {
-			logger.Errorf("Error while connecting to database. %v", err)
-			errorResponse := response.ErrorDto{
-				Message:   "Something went wrong",
-				Timestamp: time.Now(),
-			}
-			context.IndentedJSON(http.StatusInternalServerError, errorResponse)
-			return
+
+	if err != nil {
+		logger.Errorf("Error while connecting to database. %v", err)
+		errorResponse := response.ErrorDto{
+			Message:   "Something went wrong",
+			Timestamp: time.Now(),
 		}
+		context.IndentedJSON(http.StatusInternalServerError, errorResponse)
+		return
+	}
+
+	if createdUser == nil {
 		logger.Error("Error while persisting user. ", err)
 		errorResponse := response.ErrorDto{
 			Message:   "Error while creating user.",
@@ -103,17 +102,18 @@ func (h *Handler) FindById(context *gin.Context) {
 	id := context.Param("id")
 	logger.Infof("Finding user by id %s", id)
 	user, err := h.service.GetUserById(context, id)
-	if user == nil {
-		var databaseError *exceptions.DatabaseError
-		if errors.As(err, &databaseError) {
-			logger.Errorf("Error while connecting to database. %v", err)
-			errorResponse := response.ErrorDto{
-				Message:   "Something went wrong",
-				Timestamp: time.Now(),
-			}
-			context.IndentedJSON(http.StatusInternalServerError, errorResponse)
-			return
+
+	if err != nil {
+		logger.Errorf("Error while connecting to database. %v", err)
+		errorResponse := response.ErrorDto{
+			Message:   "Something went wrong",
+			Timestamp: time.Now(),
 		}
+		context.IndentedJSON(http.StatusInternalServerError, errorResponse)
+		return
+	}
+
+	if user == nil {
 		logger.Errorf("Error while finding user by id %s.", id)
 		errorResponse := response.ErrorDto{
 			Message:   "No user found with id " + id,
@@ -122,6 +122,7 @@ func (h *Handler) FindById(context *gin.Context) {
 		context.IndentedJSON(http.StatusNotFound, errorResponse)
 		return
 	}
+
 	responseBody := mapper.UserToUserResponseDto(*user)
 	context.IndentedJSON(http.StatusOK, responseBody)
 }
