@@ -2,7 +2,7 @@
 
 #Variables
 APP_NAME=ps-tag-onboarding-go
-COMPOSE_FILE=build/.docker/stack.yaml
+COMPOSE_FILE=build/.docker/docker-compose.yaml
 
 # Tasks
 default: run-with-docs
