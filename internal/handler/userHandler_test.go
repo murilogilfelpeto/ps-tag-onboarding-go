@@ -19,256 +19,256 @@ import (
 	"testing"
 )
 
-func TestSaveUser(t *testing.T) {
+func TestSaveUserSuccess(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	t.Run("Persist User", func(t *testing.T) {
-		recorder := httptest.NewRecorder()
-		ctx, _ := gin.CreateTestContext(recorder)
-		mockService := &mocks.Service{}
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	mockService := mocks.NewService(t)
 
-		requestBody := request.UserRequestDto{
-			FirstName: "John",
-			LastName:  "Doe",
-			Email:     "johndoe@email.com",
-			Age:       18,
-		}
+	requestBody := request.UserRequestDto{
+		FirstName: "John",
+		LastName:  "Doe",
+		Email:     "johndoe@email.com",
+		Age:       18,
+	}
 
-		jsonBody, _ := json.Marshal(requestBody)
-		ctx.Request = &http.Request{
-			Body: io.NopCloser(bytes.NewBuffer(jsonBody)),
-		}
+	jsonBody, _ := json.Marshal(requestBody)
+	ctx.Request = &http.Request{
+		Body: io.NopCloser(bytes.NewBuffer(jsonBody)),
+	}
 
-		user, _ := mapper.UserRequestToUser(requestBody)
-		createdUser, _ := models.NewUser("f7d2ea4b-a4d0-4103-9c63-55ec7977e4d1", "John", "Doe", "john.doe@email.com", 36)
-		mockService.EXPECT().SaveUser(ctx, user).Return(&createdUser, nil).Once()
+	user, _ := mapper.UserRequestToUser(requestBody)
+	createdUser, _ := models.NewUser("f7d2ea4b-a4d0-4103-9c63-55ec7977e4d1", "John", "Doe", "john.doe@email.com", 36)
+	mockService.EXPECT().SaveUser(ctx, user).Return(&createdUser, nil).Once()
 
-		handler := &Handler{
-			service: mockService,
-		}
+	handler := &Handler{
+		service: mockService,
+	}
 
-		handler.Save(ctx)
-		var responseBody response.UserResponseDto
-		_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
+	handler.Save(ctx)
+	var responseBody response.UserResponseDto
+	_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
 
-		assert.Equal(t, http.StatusCreated, recorder.Code)
-		assert.Equal(t, createdUser.GetID(), responseBody.ID)
-		assert.Equal(t, createdUser.GetFirstName(), responseBody.FirstName)
-		assert.Equal(t, createdUser.GetLastName(), responseBody.LastName)
-		assert.Equal(t, createdUser.GetEmail(), responseBody.Email)
-		assert.Equal(t, createdUser.GetAge(), responseBody.Age)
-		mockService.AssertExpectations(t)
-		mockService.AssertNumberOfCalls(t, "GetUserById", 0)
-	})
+	assert.Equal(t, http.StatusCreated, recorder.Code)
+	assert.Equal(t, createdUser.GetID(), responseBody.ID)
+	assert.Equal(t, createdUser.GetFirstName(), responseBody.FirstName)
+	assert.Equal(t, createdUser.GetLastName(), responseBody.LastName)
+	assert.Equal(t, createdUser.GetEmail(), responseBody.Email)
+	assert.Equal(t, createdUser.GetAge(), responseBody.Age)
+	mockService.AssertExpectations(t)
+	mockService.AssertNumberOfCalls(t, "GetUserById", 0)
+}
 
-	t.Run("Error Binding Json all fields", func(t *testing.T) {
-		recorder := httptest.NewRecorder()
-		ctx, _ := gin.CreateTestContext(recorder)
-		mockService := &mocks.Service{}
+func TestErrorPersistingUser(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	mockService := mocks.NewService(t)
 
-		requestBody := request.UserRequestDto{
-			FirstName: "",
-			LastName:  "",
-			Email:     "",
-			Age:       17,
-		}
+	requestBody := request.UserRequestDto{
+		FirstName: "John",
+		LastName:  "Doe",
+		Email:     "johndoe@email.com",
+		Age:       18,
+	}
 
-		jsonBody, _ := json.Marshal(requestBody)
-		ctx.Request = &http.Request{
-			Body: io.NopCloser(bytes.NewBuffer(jsonBody)),
-		}
+	jsonBody, _ := json.Marshal(requestBody)
+	ctx.Request = &http.Request{
+		Body: io.NopCloser(bytes.NewBuffer(jsonBody)),
+	}
 
-		handler := &Handler{
-			service: mockService,
-		}
+	user, _ := mapper.UserRequestToUser(requestBody)
+	mockService.EXPECT().SaveUser(ctx, user).Return(nil, errors.New("some error")).Once()
 
-		handler.Save(ctx)
-		var responseBody response.ErrorDto
-		_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
+	handler := &Handler{
+		service: mockService,
+	}
 
-		assert.Equal(t, http.StatusBadRequest, recorder.Code)
-		assert.Equal(t, "Error while binding JSON", responseBody.Message)
-		assert.NotEmpty(t, responseBody.Timestamp)
-		assert.NotEmpty(t, responseBody.Field)
+	handler.Save(ctx)
+	var responseBody response.ErrorDto
+	_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
+	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+	assert.Equal(t, "Something went wrong", responseBody.Message)
+	assert.NotEmpty(t, responseBody.Timestamp)
+	assert.Nil(t, responseBody.Field)
+	mockService.AssertExpectations(t)
+	mockService.AssertNumberOfCalls(t, "GetUserById", 0)
+}
+func TestBindJsonFailure(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	mockService := mocks.NewService(t)
 
-		fields, _ := convertToMap(responseBody.Field)
-		assert.Equal(t, "required", fields["firstName"])
-		assert.Equal(t, "required", fields["lastName"])
-		assert.Equal(t, "required", fields["email"])
-		assert.Equal(t, "age must be greater than 18", fields["age"])
-		mockService.AssertNumberOfCalls(t, "SaveUser", 0)
-		mockService.AssertNumberOfCalls(t, "GetUserById", 0)
+	requestBody := request.UserRequestDto{
+		FirstName: "",
+		LastName:  "",
+		Email:     "",
+		Age:       17,
+	}
 
-	})
-	t.Run("Error Binding Json nil age and invalid email", func(t *testing.T) {
-		recorder := httptest.NewRecorder()
-		ctx, _ := gin.CreateTestContext(recorder)
-		mockService := &mocks.Service{}
+	jsonBody, _ := json.Marshal(requestBody)
+	ctx.Request = &http.Request{
+		Body: io.NopCloser(bytes.NewBuffer(jsonBody)),
+	}
 
-		requestBody := request.UserRequestDto{
-			FirstName: "John",
-			LastName:  "Doe",
-			Email:     "invalid-email",
-		}
+	handler := &Handler{
+		service: mockService,
+	}
 
-		jsonBody, _ := json.Marshal(requestBody)
-		ctx.Request = &http.Request{
-			Body: io.NopCloser(bytes.NewBuffer(jsonBody)),
-		}
+	handler.Save(ctx)
+	var responseBody response.ErrorDto
+	_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
 
-		handler := &Handler{
-			service: mockService,
-		}
+	assert.Equal(t, http.StatusBadRequest, recorder.Code)
+	assert.Equal(t, "Error while binding JSON", responseBody.Message)
+	assert.NotEmpty(t, responseBody.Timestamp)
+	assert.NotEmpty(t, responseBody.Field)
 
-		handler.Save(ctx)
-		var responseBody response.ErrorDto
-		_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
+	fields, _ := convertToMap(responseBody.Field)
+	assert.Equal(t, "required", fields["firstName"])
+	assert.Equal(t, "required", fields["lastName"])
+	assert.Equal(t, "required", fields["email"])
+	assert.Equal(t, "age must be greater than 18", fields["age"])
+	mockService.AssertNumberOfCalls(t, "SaveUser", 0)
+	mockService.AssertNumberOfCalls(t, "GetUserById", 0)
+}
 
-		assert.Equal(t, http.StatusBadRequest, recorder.Code)
-		assert.Equal(t, "Error while binding JSON", responseBody.Message)
-		assert.NotEmpty(t, responseBody.Timestamp)
-		assert.NotEmpty(t, responseBody.Field)
+func TestBindAgeAndEmailJsonFields(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	mockService := mocks.NewService(t)
 
-		fields, _ := convertToMap(responseBody.Field)
-		assert.Equal(t, "not a valid email address", fields["email"])
-		assert.Equal(t, "required", fields["age"])
-		mockService.AssertNumberOfCalls(t, "SaveUser", 0)
-		mockService.AssertNumberOfCalls(t, "GetUserById", 0)
+	requestBody := request.UserRequestDto{
+		FirstName: "John",
+		LastName:  "Doe",
+		Email:     "invalid-email",
+	}
 
-	})
-	t.Run("Error persisting user", func(t *testing.T) {
-		recorder := httptest.NewRecorder()
-		ctx, _ := gin.CreateTestContext(recorder)
-		mockService := &mocks.Service{}
+	jsonBody, _ := json.Marshal(requestBody)
+	ctx.Request = &http.Request{
+		Body: io.NopCloser(bytes.NewBuffer(jsonBody)),
+	}
 
-		requestBody := request.UserRequestDto{
-			FirstName: "John",
-			LastName:  "Doe",
-			Email:     "johndoe@email.com",
-			Age:       18,
-		}
+	handler := &Handler{
+		service: mockService,
+	}
 
-		jsonBody, _ := json.Marshal(requestBody)
-		ctx.Request = &http.Request{
-			Body: io.NopCloser(bytes.NewBuffer(jsonBody)),
-		}
+	handler.Save(ctx)
+	var responseBody response.ErrorDto
+	_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
 
-		user, _ := mapper.UserRequestToUser(requestBody)
-		mockService.EXPECT().SaveUser(ctx, user).Return(nil, errors.New("some error")).Once()
+	assert.Equal(t, http.StatusBadRequest, recorder.Code)
+	assert.Equal(t, "Error while binding JSON", responseBody.Message)
+	assert.NotEmpty(t, responseBody.Timestamp)
+	assert.NotEmpty(t, responseBody.Field)
 
-		handler := &Handler{
-			service: mockService,
-		}
-
-		handler.Save(ctx)
-		var responseBody response.ErrorDto
-		_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
-		assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-		assert.Equal(t, "Something went wrong", responseBody.Message)
-		assert.NotEmpty(t, responseBody.Timestamp)
-		assert.Nil(t, responseBody.Field)
-		mockService.AssertExpectations(t)
-		mockService.AssertNumberOfCalls(t, "GetUserById", 0)
-	})
+	fields, _ := convertToMap(responseBody.Field)
+	assert.Equal(t, "not a valid email address", fields["email"])
+	assert.Equal(t, "required", fields["age"])
+	mockService.AssertNumberOfCalls(t, "SaveUser", 0)
+	mockService.AssertNumberOfCalls(t, "GetUserById", 0)
 }
 
 func TestFindById(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	t.Run("Find user by id", func(t *testing.T) {
-		recorder := httptest.NewRecorder()
-		ctx, _ := gin.CreateTestContext(recorder)
-		mockService := &mocks.Service{}
-		id := uuid.New().String()
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	mockService := mocks.NewService(t)
+	id := uuid.New().String()
 
-		pathParam := []gin.Param{
-			{
-				Key:   "id",
-				Value: id,
-			},
-		}
-		ctx.Params = pathParam
+	pathParam := []gin.Param{
+		{
+			Key:   "id",
+			Value: id,
+		},
+	}
+	ctx.Params = pathParam
 
-		user, _ := models.NewUser(id, "John", "Doe", "johndoe@email.com", 18)
-		mockService.EXPECT().GetUserById(ctx, id).Return(&user, nil).Once()
+	user, _ := models.NewUser(id, "John", "Doe", "johndoe@email.com", 18)
+	mockService.EXPECT().GetUserById(ctx, id).Return(&user, nil).Once()
 
-		handler := &Handler{
-			service: mockService,
-		}
+	handler := &Handler{
+		service: mockService,
+	}
 
-		handler.FindById(ctx)
-		var responseBody response.UserResponseDto
-		_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
+	handler.FindById(ctx)
+	var responseBody response.UserResponseDto
+	_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
 
-		assert.Equal(t, http.StatusOK, recorder.Code)
-		assert.Equal(t, user.GetID(), responseBody.ID)
-		assert.Equal(t, user.GetFirstName(), responseBody.FirstName)
-		assert.Equal(t, user.GetLastName(), responseBody.LastName)
-		assert.Equal(t, user.GetEmail(), responseBody.Email)
-		assert.Equal(t, user.GetAge(), responseBody.Age)
-		mockService.AssertExpectations(t)
-		mockService.AssertNumberOfCalls(t, "SaveUser", 0)
-	})
-	t.Run("User does not exist", func(t *testing.T) {
-		recorder := httptest.NewRecorder()
-		ctx, _ := gin.CreateTestContext(recorder)
-		mockService := &mocks.Service{}
-		id := uuid.New().String()
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	assert.Equal(t, user.GetID(), responseBody.ID)
+	assert.Equal(t, user.GetFirstName(), responseBody.FirstName)
+	assert.Equal(t, user.GetLastName(), responseBody.LastName)
+	assert.Equal(t, user.GetEmail(), responseBody.Email)
+	assert.Equal(t, user.GetAge(), responseBody.Age)
+	mockService.AssertExpectations(t)
+	mockService.AssertNumberOfCalls(t, "SaveUser", 0)
+}
 
-		pathParam := []gin.Param{
-			{
-				Key:   "id",
-				Value: id,
-			},
-		}
-		ctx.Params = pathParam
+func TestUserDoesNotExist(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	mockService := mocks.NewService(t)
+	id := uuid.New().String()
 
-		mockService.EXPECT().GetUserById(ctx, id).Return(nil, nil).Once()
+	pathParam := []gin.Param{
+		{
+			Key:   "id",
+			Value: id,
+		},
+	}
+	ctx.Params = pathParam
 
-		handler := &Handler{
-			service: mockService,
-		}
+	mockService.EXPECT().GetUserById(ctx, id).Return(nil, nil).Once()
 
-		handler.FindById(ctx)
-		var responseBody response.ErrorDto
-		_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
-		errorMessage := "No user found with id " + id
-		assert.Equal(t, http.StatusNotFound, recorder.Code)
-		assert.Equal(t, errorMessage, responseBody.Message)
-		assert.NotEmpty(t, responseBody.Timestamp)
-		assert.Nil(t, responseBody.Field)
-		mockService.AssertExpectations(t)
-		mockService.AssertNumberOfCalls(t, "SaveUser", 0)
-	})
+	handler := &Handler{
+		service: mockService,
+	}
 
-	t.Run("Error finding user", func(t *testing.T) {
-		recorder := httptest.NewRecorder()
-		ctx, _ := gin.CreateTestContext(recorder)
-		mockService := &mocks.Service{}
-		id := uuid.New().String()
+	handler.FindById(ctx)
+	var responseBody response.ErrorDto
+	_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
+	errorMessage := "No user found with id " + id
+	assert.Equal(t, http.StatusNotFound, recorder.Code)
+	assert.Equal(t, errorMessage, responseBody.Message)
+	assert.NotEmpty(t, responseBody.Timestamp)
+	assert.Nil(t, responseBody.Field)
+	mockService.AssertExpectations(t)
+	mockService.AssertNumberOfCalls(t, "SaveUser", 0)
+}
+func TestErrorFindingUser(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	mockService := mocks.NewService(t)
+	id := uuid.New().String()
 
-		pathParam := []gin.Param{
-			{
-				Key:   "id",
-				Value: id,
-			},
-		}
-		ctx.Params = pathParam
+	pathParam := []gin.Param{
+		{
+			Key:   "id",
+			Value: id,
+		},
+	}
+	ctx.Params = pathParam
 
-		mockService.EXPECT().GetUserById(ctx, id).Return(nil, errors.New("some error")).Once()
+	mockService.EXPECT().GetUserById(ctx, id).Return(nil, errors.New("some error")).Once()
 
-		handler := &Handler{
-			service: mockService,
-		}
+	handler := &Handler{
+		service: mockService,
+	}
 
-		handler.FindById(ctx)
-		var responseBody response.ErrorDto
-		_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
-		assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-		assert.Equal(t, "Something went wrong", responseBody.Message)
-		assert.NotEmpty(t, responseBody.Timestamp)
-		assert.Nil(t, responseBody.Field)
-		mockService.AssertExpectations(t)
-		mockService.AssertNumberOfCalls(t, "SaveUser", 0)
-	})
+	handler.FindById(ctx)
+	var responseBody response.ErrorDto
+	_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
+	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+	assert.Equal(t, "Something went wrong", responseBody.Message)
+	assert.NotEmpty(t, responseBody.Timestamp)
+	assert.Nil(t, responseBody.Field)
+	mockService.AssertExpectations(t)
+	mockService.AssertNumberOfCalls(t, "SaveUser", 0)
 }
 
 func convertToMap(data interface{}) (map[string]string, error) {
