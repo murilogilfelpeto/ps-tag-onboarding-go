@@ -65,7 +65,7 @@ func (h *Handler) Save(context *gin.Context) {
 	createdUser, err := h.service.SaveUser(context, user)
 
 	if err != nil {
-		logger.Errorf("Somethign went wrong while persisting user in database. %v", err)
+		logger.Errorf("Something went wrong while persisting user in database. %v", err)
 		errorResponse := response.ErrorDto{
 			Message:   "Something went wrong",
 			Timestamp: time.Now(),
@@ -104,7 +104,7 @@ func (h *Handler) FindById(context *gin.Context) {
 	user, err := h.service.GetUserById(context, id)
 
 	if err != nil {
-		logger.Errorf("Somethign went wrong in database. %v", err)
+		logger.Errorf("Something went wrong in database. %v", err)
 		errorResponse := response.ErrorDto{
 			Message:   "Something went wrong",
 			Timestamp: time.Now(),
