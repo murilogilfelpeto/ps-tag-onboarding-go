@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Repository interface {
+type UserRepository interface {
 	Save(ctx context.Context, user models.User) (*models.User, error)
 	GetUserById(ctx context.Context, id string) (*models.User, error)
 	GetUserByFullName(ctx context.Context, firstName string, lastName string) (*models.User, error)
@@ -22,7 +22,7 @@ type repository struct {
 	collection *mongo.Collection
 }
 
-func NewUserRepository(client *mongo.Client, dbName string, collectionName string) Repository {
+func NewUserRepository(client *mongo.Client, dbName string, collectionName string) UserRepository {
 	db := client.Database(dbName)
 	collection := db.Collection(collectionName)
 

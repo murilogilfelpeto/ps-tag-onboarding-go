@@ -18,12 +18,12 @@ var (
 )
 
 type Handler struct {
-	service service.Service
+	userService service.UserService
 }
 
-func NewUserHandler(service service.Service) Handler {
+func NewUserHandler(service service.UserService) Handler {
 	return Handler{
-		service: service,
+		userService: service,
 	}
 }
 
@@ -62,7 +62,7 @@ func (h *Handler) Save(context *gin.Context) {
 		context.IndentedJSON(http.StatusUnprocessableEntity, errorResponse)
 		return
 	}
-	createdUser, err := h.service.SaveUser(context, user)
+	createdUser, err := h.userService.SaveUser(context, user)
 
 	if err != nil {
 		logger.Errorf("Something went wrong while persisting user in database. %v", err)
@@ -101,7 +101,7 @@ func (h *Handler) Save(context *gin.Context) {
 func (h *Handler) FindById(context *gin.Context) {
 	id := context.Param("id")
 	logger.Infof("Finding user by id %s", id)
-	user, err := h.service.GetUserById(context, id)
+	user, err := h.userService.GetUserById(context, id)
 
 	if err != nil {
 		logger.Errorf("Something went wrong in database. %v", err)

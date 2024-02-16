@@ -10,18 +10,18 @@ import (
 	"go.mongodb.org/mongo-driver/x/mongo/driver/topology"
 )
 
-type Service interface {
+type UserService interface {
 	SaveUser(ctx context.Context, user models.User) (*models.User, error)
 	GetUserById(ctx context.Context, id string) (*models.User, error)
 }
 
 type service struct {
-	repository repository.Repository
+	userRepository repository.UserRepository
 }
 
-func NewUserService(repository repository.Repository) Service {
+func NewUserService(repository repository.UserRepository) UserService {
 	return &service{
-		repository: repository,
+		userRepository: repository,
 	}
 }
 
@@ -29,7 +29,7 @@ const errorMessage = "something went wrong"
 
 func (srv *service) SaveUser(ctx context.Context, user models.User) (*models.User, error) {
 	logger.Infof("Saving user %s", user.GetFullName())
-	userByFullName, err := srv.repository.GetUserByFullName(ctx, user.GetFirstName(), user.GetLastName())
+	userByFullName, err := srv.userRepository.GetUserByFullName(ctx, user.GetFirstName(), user.GetLastName())
 
 	if userByFullName != nil {
 		if err == nil {
@@ -39,7 +39,7 @@ func (srv *service) SaveUser(ctx context.Context, user models.User) (*models.Use
 		logger.Errorf("Something went wrong: %v", err)
 		return nil, &exceptions.DatabaseError{Err: errors.New(errorMessage)}
 	}
-	createdUser, err := srv.repository.Save(ctx, user)
+	createdUser, err := srv.userRepository.Save(ctx, user)
 	if err != nil {
 		var serverSelectionError topology.ServerSelectionError
 		if errors.Is(err, &serverSelectionError) {
@@ -55,7 +55,7 @@ func (srv *service) SaveUser(ctx context.Context, user models.User) (*models.Use
 
 func (srv *service) GetUserById(ctx context.Context, id string) (*models.User, error) {
 	logger.Infof("Getting user by id %s", id)
-	user, err := srv.repository.GetUserById(ctx, id)
+	user, err := srv.userRepository.GetUserById(ctx, id)
 	if user == nil {
 		if err == nil {
 			logger.Errorf("Error finding user: %v", err)

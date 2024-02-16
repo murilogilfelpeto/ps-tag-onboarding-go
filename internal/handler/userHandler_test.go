@@ -42,7 +42,7 @@ func TestSaveUserSuccess(t *testing.T) {
 	mockService.EXPECT().SaveUser(ctx, user).Return(&createdUser, nil).Once()
 
 	handler := &Handler{
-		service: mockService,
+		userService: mockService,
 	}
 
 	handler.Save(ctx)
@@ -81,7 +81,7 @@ func TestErrorPersistingUser(t *testing.T) {
 	mockService.EXPECT().SaveUser(ctx, user).Return(nil, errors.New("some error")).Once()
 
 	handler := &Handler{
-		service: mockService,
+		userService: mockService,
 	}
 
 	handler.Save(ctx)
@@ -113,7 +113,7 @@ func TestBindJsonFailure(t *testing.T) {
 	}
 
 	handler := &Handler{
-		service: mockService,
+		userService: mockService,
 	}
 
 	handler.Save(ctx)
@@ -152,7 +152,7 @@ func TestBindAgeAndEmailJsonFields(t *testing.T) {
 	}
 
 	handler := &Handler{
-		service: mockService,
+		userService: mockService,
 	}
 
 	handler.Save(ctx)
@@ -190,7 +190,7 @@ func TestFindById(t *testing.T) {
 	mockService.EXPECT().GetUserById(ctx, id).Return(&user, nil).Once()
 
 	handler := &Handler{
-		service: mockService,
+		userService: mockService,
 	}
 
 	handler.FindById(ctx)
@@ -225,7 +225,7 @@ func TestUserDoesNotExist(t *testing.T) {
 	mockService.EXPECT().GetUserById(ctx, id).Return(nil, nil).Once()
 
 	handler := &Handler{
-		service: mockService,
+		userService: mockService,
 	}
 
 	handler.FindById(ctx)
@@ -257,7 +257,7 @@ func TestErrorFindingUser(t *testing.T) {
 	mockService.EXPECT().GetUserById(ctx, id).Return(nil, errors.New("some error")).Once()
 
 	handler := &Handler{
-		service: mockService,
+		userService: mockService,
 	}
 
 	handler.FindById(ctx)

@@ -20,7 +20,7 @@ func TestSaveUser(t *testing.T) {
 	mockRepo.EXPECT().Save(context.Background(), user).Return(&user, nil).Once()
 
 	srv := &service{
-		repository: mockRepo,
+		userRepository: mockRepo,
 	}
 
 	createdUser, err := srv.SaveUser(context.Background(), user)
@@ -37,7 +37,7 @@ func TestUserAlreadyExists(t *testing.T) {
 	mockRepo.EXPECT().GetUserByFullName(context.Background(), user.GetFirstName(), user.GetLastName()).Return(&user, nil).Once()
 
 	srv := &service{
-		repository: mockRepo,
+		userRepository: mockRepo,
 	}
 
 	createdUser, err := srv.SaveUser(context.Background(), user)
@@ -56,7 +56,7 @@ func TestErrorPersistingUser(t *testing.T) {
 	mockRepo.EXPECT().Save(context.Background(), user).Return(nil, errors.New("some error")).Once()
 
 	srv := &service{
-		repository: mockRepo,
+		userRepository: mockRepo,
 	}
 
 	createdUser, err := srv.SaveUser(context.Background(), user)
@@ -73,7 +73,7 @@ func TestGetUserById(t *testing.T) {
 	mockRepo.EXPECT().GetUserById(context.Background(), id).Return(&mockUser, nil).Once()
 
 	srv := &service{
-		repository: mockRepo,
+		userRepository: mockRepo,
 	}
 
 	user, err := srv.GetUserById(context.Background(), id)
@@ -93,7 +93,7 @@ func TestUserNotFound(t *testing.T) {
 	mockRepo.EXPECT().GetUserById(context.Background(), id).Return(nil, nil).Once()
 
 	srv := &service{
-		repository: mockRepo,
+		userRepository: mockRepo,
 	}
 
 	user, err := srv.GetUserById(context.Background(), id)
@@ -112,7 +112,7 @@ func TestDatabaseError(t *testing.T) {
 	mockRepo.EXPECT().GetUserById(context.Background(), id).Return(nil, errors.New("some error")).Once()
 
 	srv := &service{
-		repository: mockRepo,
+		userRepository: mockRepo,
 	}
 
 	user, err := srv.GetUserById(context.Background(), id)
