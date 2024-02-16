@@ -162,8 +162,8 @@ func TestSaveUser(t *testing.T) {
 		handler.Save(ctx)
 		var responseBody response.ErrorDto
 		_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
-		assert.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
-		assert.Equal(t, "Error while creating user.", responseBody.Message)
+		assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+		assert.Equal(t, "Something went wrong", responseBody.Message)
 		assert.NotEmpty(t, responseBody.Timestamp)
 		assert.Nil(t, responseBody.Field)
 		mockService.AssertExpectations(t)
@@ -207,6 +207,38 @@ func TestFindById(t *testing.T) {
 		mockService.AssertExpectations(t)
 		mockService.AssertNumberOfCalls(t, "SaveUser", 0)
 	})
+	t.Run("User does not exist", func(t *testing.T) {
+		recorder := httptest.NewRecorder()
+		ctx, _ := gin.CreateTestContext(recorder)
+		mockService := &mocks.Service{}
+		id := uuid.New().String()
+
+		pathParam := []gin.Param{
+			{
+				Key:   "id",
+				Value: id,
+			},
+		}
+		ctx.Params = pathParam
+
+		mockService.EXPECT().GetUserById(ctx, id).Return(nil, nil).Once()
+
+		handler := &Handler{
+			service: mockService,
+		}
+
+		handler.FindById(ctx)
+		var responseBody response.ErrorDto
+		_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
+		errorMessage := "No user found with id " + id
+		assert.Equal(t, http.StatusNotFound, recorder.Code)
+		assert.Equal(t, errorMessage, responseBody.Message)
+		assert.NotEmpty(t, responseBody.Timestamp)
+		assert.Nil(t, responseBody.Field)
+		mockService.AssertExpectations(t)
+		mockService.AssertNumberOfCalls(t, "SaveUser", 0)
+	})
+
 	t.Run("Error finding user", func(t *testing.T) {
 		recorder := httptest.NewRecorder()
 		ctx, _ := gin.CreateTestContext(recorder)
@@ -230,9 +262,8 @@ func TestFindById(t *testing.T) {
 		handler.FindById(ctx)
 		var responseBody response.ErrorDto
 		_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
-		errorMessage := "No user found with id " + id
-		assert.Equal(t, http.StatusNotFound, recorder.Code)
-		assert.Equal(t, errorMessage, responseBody.Message)
+		assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+		assert.Equal(t, "Something went wrong", responseBody.Message)
 		assert.NotEmpty(t, responseBody.Timestamp)
 		assert.Nil(t, responseBody.Field)
 		mockService.AssertExpectations(t)
