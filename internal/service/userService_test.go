@@ -26,7 +26,6 @@ func TestSaveUser(t *testing.T) {
 	createdUser, err := srv.SaveUser(context.Background(), user)
 	assert.NoError(t, err)
 	assert.Equal(t, user, *createdUser)
-	mockRepo.AssertExpectations(t)
 }
 
 func TestUserAlreadyExists(t *testing.T) {
@@ -43,8 +42,6 @@ func TestUserAlreadyExists(t *testing.T) {
 	createdUser, err := srv.SaveUser(context.Background(), user)
 	assert.Nil(t, err)
 	assert.Nil(t, createdUser)
-	mockRepo.AssertExpectations(t)
-	mockRepo.AssertNumberOfCalls(t, "Save", 0)
 }
 func TestErrorPersistingUser(t *testing.T) {
 	mockRepo := mocks.NewRepository(t)
@@ -62,7 +59,6 @@ func TestErrorPersistingUser(t *testing.T) {
 	createdUser, err := srv.SaveUser(context.Background(), user)
 	assert.Error(t, err)
 	assert.Nil(t, createdUser)
-	mockRepo.AssertExpectations(t)
 }
 func TestGetUserById(t *testing.T) {
 	mockRepo := mocks.NewRepository(t)
@@ -79,10 +75,6 @@ func TestGetUserById(t *testing.T) {
 	user, err := srv.GetUserById(context.Background(), id)
 	assert.NoError(t, err)
 	assert.Equal(t, mockUser, *user)
-	mockRepo.AssertExpectations(t)
-	mockRepo.AssertNumberOfCalls(t, "Save", 0)
-	mockRepo.AssertNumberOfCalls(t, "GetUserByFullName", 0)
-
 }
 
 func TestUserNotFound(t *testing.T) {
@@ -99,9 +91,6 @@ func TestUserNotFound(t *testing.T) {
 	user, err := srv.GetUserById(context.Background(), id)
 	assert.Nil(t, err)
 	assert.Nil(t, user)
-	mockRepo.AssertExpectations(t)
-	mockRepo.AssertNumberOfCalls(t, "Save", 0)
-	mockRepo.AssertNumberOfCalls(t, "GetUserByFullName", 0)
 }
 
 func TestDatabaseError(t *testing.T) {
@@ -118,7 +107,4 @@ func TestDatabaseError(t *testing.T) {
 	user, err := srv.GetUserById(context.Background(), id)
 	assert.Error(t, err)
 	assert.Nil(t, user)
-	mockRepo.AssertExpectations(t)
-	mockRepo.AssertNumberOfCalls(t, "Save", 0)
-	mockRepo.AssertNumberOfCalls(t, "GetUserByFullName", 0)
 }

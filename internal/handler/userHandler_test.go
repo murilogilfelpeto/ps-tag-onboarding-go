@@ -55,8 +55,6 @@ func TestSaveUserSuccess(t *testing.T) {
 	assert.Equal(t, createdUser.GetLastName(), responseBody.LastName)
 	assert.Equal(t, createdUser.GetEmail(), responseBody.Email)
 	assert.Equal(t, createdUser.GetAge(), responseBody.Age)
-	mockService.AssertExpectations(t)
-	mockService.AssertNumberOfCalls(t, "GetUserById", 0)
 }
 
 func TestErrorPersistingUser(t *testing.T) {
@@ -91,8 +89,6 @@ func TestErrorPersistingUser(t *testing.T) {
 	assert.Equal(t, "Something went wrong", responseBody.Message)
 	assert.NotEmpty(t, responseBody.Timestamp)
 	assert.Nil(t, responseBody.Field)
-	mockService.AssertExpectations(t)
-	mockService.AssertNumberOfCalls(t, "GetUserById", 0)
 }
 func TestBindJsonFailure(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -130,8 +126,6 @@ func TestBindJsonFailure(t *testing.T) {
 	assert.Equal(t, "required", fields["lastName"])
 	assert.Equal(t, "required", fields["email"])
 	assert.Equal(t, "age must be greater than 18", fields["age"])
-	mockService.AssertNumberOfCalls(t, "SaveUser", 0)
-	mockService.AssertNumberOfCalls(t, "GetUserById", 0)
 }
 
 func TestBindAgeAndEmailJsonFields(t *testing.T) {
@@ -167,8 +161,6 @@ func TestBindAgeAndEmailJsonFields(t *testing.T) {
 	fields, _ := convertToMap(responseBody.Field)
 	assert.Equal(t, "not a valid email address", fields["email"])
 	assert.Equal(t, "required", fields["age"])
-	mockService.AssertNumberOfCalls(t, "SaveUser", 0)
-	mockService.AssertNumberOfCalls(t, "GetUserById", 0)
 }
 
 func TestFindById(t *testing.T) {
@@ -203,8 +195,6 @@ func TestFindById(t *testing.T) {
 	assert.Equal(t, user.GetLastName(), responseBody.LastName)
 	assert.Equal(t, user.GetEmail(), responseBody.Email)
 	assert.Equal(t, user.GetAge(), responseBody.Age)
-	mockService.AssertExpectations(t)
-	mockService.AssertNumberOfCalls(t, "SaveUser", 0)
 }
 
 func TestUserDoesNotExist(t *testing.T) {
@@ -236,8 +226,6 @@ func TestUserDoesNotExist(t *testing.T) {
 	assert.Equal(t, errorMessage, responseBody.Message)
 	assert.NotEmpty(t, responseBody.Timestamp)
 	assert.Nil(t, responseBody.Field)
-	mockService.AssertExpectations(t)
-	mockService.AssertNumberOfCalls(t, "SaveUser", 0)
 }
 func TestErrorFindingUser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -267,8 +255,6 @@ func TestErrorFindingUser(t *testing.T) {
 	assert.Equal(t, "Something went wrong", responseBody.Message)
 	assert.NotEmpty(t, responseBody.Timestamp)
 	assert.Nil(t, responseBody.Field)
-	mockService.AssertExpectations(t)
-	mockService.AssertNumberOfCalls(t, "SaveUser", 0)
 }
 
 func convertToMap(data interface{}) (map[string]string, error) {
