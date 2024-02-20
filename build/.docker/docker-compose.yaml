@@ -24,8 +24,19 @@ services:
     container_name: onboarding-go
     ports:
       - 8080:8080
+      - 49092:40000
     build:
       context: ../../
       dockerfile: build/.docker/Dockerfile
+    command:
+      - dlv
+      - --listen=:40000
+      - --log
+      - --headless
+      - --api-version=2
+      - --accept-multiclient
+      - exec
+      - /app/cmd/ps-tag-onboarding/ps-tag-onboarding
+      - --continue
     depends_on:
       - mongodb
