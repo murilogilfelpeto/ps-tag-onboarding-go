@@ -7,189 +7,174 @@ import (
 	"testing"
 )
 
-func TestNewUser_WithValidData_ShouldSucceed(t *testing.T) {
-	id := "2814cd53-acde-4e49-9e47-cdc1d5dd48c7"
-	firstName := "John"
-	lastName := "Doe"
-	email := "john.doe@example.com"
-	age := 18
-
-	user, err := NewUser(id, firstName, lastName, email, age)
-
-	assert.NoError(t, err)
-	assert.Equal(t, id, user.GetID())
-	assert.Equal(t, firstName, user.GetFirstName())
-	assert.Equal(t, lastName, user.GetLastName())
-	assert.Equal(t, email, user.GetEmail())
-	assert.Equal(t, age, user.GetAge())
-	assert.Equal(t, "John Doe", user.GetFullName())
-}
-
-func TestNewUser_WithInvalidData_ShouldFail(t *testing.T) {
-	t.Run("User with invalid uuid", func(t *testing.T) {
-		id := "12345"
-		firstName := "John"
-		lastName := "Doe"
-		email := "john.doe@example.com"
-		age := 25
-
-		errMsg := &exceptions.UserValidationErr{Err: errors.New("Invalid id")}
-		user, err := NewUser(id, firstName, lastName, email, age)
-
-		assert.Error(t, err)
-		assert.Equal(t, errMsg, err)
-		assert.Equal(t, User{}, user)
-	})
-	t.Run("User with invalid first name", func(t *testing.T) {
-		id := "20dc141d-3108-4529-8d65-ff3b046954be"
-		firstName := ""
-		lastName := "Doe"
-		email := "john.doe@example.com"
-		age := 25
-
-		errMsg := &exceptions.UserValidationErr{Err: errors.New("First name is required")}
-		user, err := NewUser(id, firstName, lastName, email, age)
-
-		assert.Error(t, err)
-		assert.Equal(t, errMsg, err)
-		assert.Equal(t, User{}, user)
-	})
-	t.Run("User with invalid last name", func(t *testing.T) {
-		id := "20dc141d-3108-4529-8d65-ff3b046954be"
-		firstName := "John"
-		lastName := ""
-		email := "john.doe@example.com"
-		age := 25
-
-		errMsg := &exceptions.UserValidationErr{Err: errors.New("Last name is required")}
-		user, err := NewUser(id, firstName, lastName, email, age)
-
-		assert.Error(t, err)
-		assert.Equal(t, errMsg, err)
-		assert.Equal(t, User{}, user)
-	})
-	t.Run("User with invalid email", func(t *testing.T) {
-		id := "20dc141d-3108-4529-8d65-ff3b046954be"
-		firstName := "John"
-		lastName := "Doe"
-		email := ""
-		age := 25
-
-		errMsg := &exceptions.UserValidationErr{Err: errors.New("Email is required")}
-		user, err := NewUser(id, firstName, lastName, email, age)
-
-		assert.Error(t, err)
-		assert.Equal(t, errMsg, err)
-		assert.Equal(t, User{}, user)
-	})
-	t.Run("User with invalid age", func(t *testing.T) {
-		id := "20dc141d-3108-4529-8d65-ff3b046954be"
-		firstName := "John"
-		lastName := "Doe"
-		email := "johhn.doe@email.com"
-		age := 17
-
-		errMsg := &exceptions.UserValidationErr{Err: errors.New("User must be at least 18 years old")}
-		user, err := NewUser(id, firstName, lastName, email, age)
-
-		assert.Error(t, err)
-		assert.Equal(t, errMsg, err)
-		assert.Equal(t, User{}, user)
-	})
-}
-
-func TestValidateUser_WithValidUser_ShouldSucceed(t *testing.T) {
-	user := &User{
-		id:        "ab90b9a4-81c8-4199-a6eb-75b16cafc55a",
-		firstName: "John",
-		lastName:  "Doe",
-		email:     "john.doe@example.com",
-		age:       25,
+func TestUser_WhenUserIsCreated(t *testing.T) {
+	tests := []struct {
+		TestName     string
+		Id           string
+		FirstName    string
+		LastName     string
+		Email        string
+		Age          int
+		ExpectedUser User
+		Error        error
+	}{
+		{
+			TestName:  "when user has valid data, then error must be nil",
+			Id:        "2814cd53-acde-4e49-9e47-cdc1d5dd48c7",
+			FirstName: "John",
+			LastName:  "Doe",
+			Email:     "john.doe@example.com",
+			Age:       18,
+			ExpectedUser: User{
+				id:        "2814cd53-acde-4e49-9e47-cdc1d5dd48c7",
+				firstName: "John",
+				lastName:  "Doe",
+				email:     "john.doe@example.com",
+				age:       18,
+			},
+			Error: nil,
+		},
+		{
+			TestName:     "When user has invalid uuid, then error must be UserValidationErr with message Invalid id",
+			Id:           "12345",
+			FirstName:    "John",
+			LastName:     "Doe",
+			Email:        "john.doe@example.com",
+			Age:          18,
+			ExpectedUser: User{},
+			Error:        &exceptions.UserValidationErr{Err: errors.New("Invalid id")},
+		},
+		{
+			TestName:     "When user has invalid first name, then error must be UserValidationErr with message First name is required",
+			Id:           "2814cd53-acde-4e49-9e47-cdc1d5dd48c7",
+			FirstName:    "",
+			LastName:     "Doe",
+			Email:        "john.doe@example.com",
+			Age:          18,
+			ExpectedUser: User{},
+			Error:        &exceptions.UserValidationErr{Err: errors.New("First name is required")},
+		},
+		{
+			TestName:     "When user has invalid last name, then error must be UserValidationErr with message Last name is required",
+			Id:           "2814cd53-acde-4e49-9e47-cdc1d5dd48c7",
+			FirstName:    "John",
+			LastName:     "",
+			Email:        "john.doe@example.com",
+			Age:          18,
+			ExpectedUser: User{},
+			Error:        &exceptions.UserValidationErr{Err: errors.New("Last name is required")},
+		},
+		{
+			TestName:     "When user has invalid email, then error must be UserValidationErr with message Email is required",
+			Id:           "2814cd53-acde-4e49-9e47-cdc1d5dd48c7",
+			FirstName:    "John",
+			LastName:     "Doe",
+			Email:        "",
+			Age:          18,
+			ExpectedUser: User{},
+			Error:        &exceptions.UserValidationErr{Err: errors.New("Email is required")},
+		},
+		{
+			TestName:     "When user has invalid age, then error must be UserValidationErr with message User must be at least 18 years old",
+			Id:           "2814cd53-acde-4e49-9e47-cdc1d5dd48c7",
+			FirstName:    "John",
+			LastName:     "Doe",
+			Email:        "john.doe@example.com",
+			Age:          17,
+			ExpectedUser: User{},
+			Error:        &exceptions.UserValidationErr{Err: errors.New("User must be at least 18 years old")},
+		},
 	}
 
-	err := validateUser(user)
-
-	assert.NoError(t, err)
+	for _, tt := range tests {
+		t.Run(tt.TestName, func(t *testing.T) {
+			user, err := NewUser(tt.Id, tt.FirstName, tt.LastName, tt.Email, tt.Age)
+			assert.Equal(t, tt.ExpectedUser, user)
+			assert.Equal(t, tt.Error, err)
+		})
+	}
 }
 
-func TestValidateUser_WithInvalidUser_ShouldFail(t *testing.T) {
-	t.Run("User with invalid uuid", func(t *testing.T) {
-		user := &User{
-			id:        "12345",
-			firstName: "John",
-			lastName:  "Doe",
-			email:     "john.doe@example.com",
-			age:       25,
-		}
-
-		errMsg := &exceptions.UserValidationErr{Err: errors.New("Invalid id")}
-		err := validateUser(user)
-
-		assert.Error(t, err)
-		assert.Equal(t, errMsg, err)
-	})
-	t.Run("User with invalid first name", func(t *testing.T) {
-		user := &User{
-			id:        "74c9e052-9fe9-4005-935a-e346d393f5ed",
-			firstName: "",
-			lastName:  "Doe",
-			email:     "john.doe@example.com",
-			age:       25,
-		}
-
-		errMsg := &exceptions.UserValidationErr{Err: errors.New("First name is required")}
-		err := validateUser(user)
-
-		assert.Error(t, err)
-		assert.Equal(t, errMsg, err)
-	})
-	t.Run("User with invalid last name", func(t *testing.T) {
-		user := &User{
-			id:        "e59209a0-0cc9-46ff-80dc-ce75733b2bfd",
-			firstName: "John",
-			lastName:  "",
-			email:     "john.doe@example.com",
-			age:       25,
-		}
-
-		errMsg := &exceptions.UserValidationErr{Err: errors.New("Last name is required")}
-		err := validateUser(user)
-
-		assert.Error(t, err)
-		assert.Equal(t, errMsg, err)
-	})
-	t.Run("User with invalid email", func(t *testing.T) {
-		user := &User{
-			id:        "1729f44d-1492-4279-80d5-8b05c42a5411",
-			firstName: "John",
-			lastName:  "Doe",
-			email:     "",
-			age:       25,
-		}
-
-		errMsg := &exceptions.UserValidationErr{Err: errors.New("Email is required")}
-		err := validateUser(user)
-
-		assert.Error(t, err)
-		assert.Equal(t, errMsg, err)
-	})
-	t.Run("User with invalid age", func(t *testing.T) {
-		user := &User{
-			id:        "73f7bd4b-1997-4627-a3e3-6f592bd72d8c",
-			firstName: "John",
-			lastName:  "Doe",
-			email:     "john.doe@example.com",
-			age:       17,
-		}
-
-		errMsg := &exceptions.UserValidationErr{Err: errors.New("User must be at least 18 years old")}
-		err := validateUser(user)
-
-		assert.Error(t, err)
-		assert.Equal(t, errMsg, err)
-	})
+func TestValidateUser_WhenCallValidateUserFunction(t *testing.T) {
+	tests := []struct {
+		TestName string
+		User     User
+		Error    error
+	}{
+		{
+			TestName: "When user has valid data, then error must be nil",
+			User: User{
+				id:        "ab90b9a4-81c8-4199-a6eb-75b16cafc55a",
+				firstName: "John",
+				lastName:  "Doe",
+				email:     "john.doe@example.com",
+				age:       25,
+			},
+			Error: nil,
+		},
+		{
+			TestName: "When user has invalid id, then error must be UserValidationErr with message Invalid id",
+			User: User{
+				id:        "12345",
+				firstName: "John",
+				lastName:  "Doe",
+				email:     "john.doe@example.com",
+				age:       18,
+			},
+			Error: &exceptions.UserValidationErr{Err: errors.New("Invalid id")},
+		},
+		{
+			TestName: "When user has invalid first name, then error must be UserValidationErr with message First name is required",
+			User: User{
+				id:        "ab90b9a4-81c8-4199-a6eb-75b16cafc55a",
+				firstName: "",
+				lastName:  "Doe",
+				email:     "john.doe@example.com",
+				age:       18,
+			},
+			Error: &exceptions.UserValidationErr{Err: errors.New("First name is required")},
+		},
+		{
+			TestName: "When user has invalid last name, then error must be UserValidationErr with message Last name is required",
+			User: User{
+				id:        "ab90b9a4-81c8-4199-a6eb-75b16cafc55a",
+				firstName: "John",
+				lastName:  "",
+				email:     "john.doe@example.com",
+				age:       18,
+			},
+			Error: &exceptions.UserValidationErr{Err: errors.New("Last name is required")},
+		},
+		{
+			TestName: "When user has invalid email, then error must be UserValidationErr with message Email is required",
+			User: User{
+				id:        "ab90b9a4-81c8-4199-a6eb-75b16cafc55a",
+				firstName: "John",
+				lastName:  "Doe",
+				email:     "",
+				age:       18,
+			},
+			Error: &exceptions.UserValidationErr{Err: errors.New("Email is required")},
+		},
+		{
+			TestName: "When user has invalid age, then error must be UserValidationErr with message User must be at least 18 years old",
+			User: User{
+				id:        "ab90b9a4-81c8-4199-a6eb-75b16cafc55a",
+				firstName: "John",
+				lastName:  "Doe",
+				email:     "john.doe@example.com",
+				age:       17,
+			},
+			Error: &exceptions.UserValidationErr{Err: errors.New("User must be at least 18 years old")},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.TestName, func(t *testing.T) {
+			err := validateUser(&tt.User)
+			assert.Equal(t, tt.Error, err)
+		})
+	}
 }
-
 func TestUser_GetFullName_ShouldReturnFullName(t *testing.T) {
 	user := &User{
 		id:        "ab90b9a4-81c8-4199-a6eb-75b16cafc55a",
