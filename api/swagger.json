@@ -1,0 +1,147 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/users": {
+            "post": {
+                "description": "Create a new user based on the provided user request data.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Create a new user",
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "userRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UserRequestDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.UserResponseDto"
+                        }
+                    },
+                    "422": {
+                        "description": "Error while binding JSON or validation error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorDto"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "description": "Find user by provided id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Find user by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorDto"
+                        }
+                    },
+                    "422": {
+                        "description": "ID in the wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorDto"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to connect to database",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorDto"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "request.UserRequestDto": {
+            "type": "object",
+            "required": [
+                "age",
+                "email",
+                "firstName",
+                "lastName"
+            ],
+            "properties": {
+                "age": {
+                    "type": "integer",
+                    "minimum": 18
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.ErrorDto": {
+            "type": "object",
+            "properties": {
+                "field": {},
+                "message": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.UserResponseDto": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

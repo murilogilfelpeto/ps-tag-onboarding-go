@@ -13,12 +13,24 @@ This is the Go version of the [onboarding exercise](https://github.com/wexinc/ps
 - [Viper](https://github.com/spf13/viper)
 - [Logrus](https://github.com/Sirupsen/logrus)
 
+## Technical Proposal
+- [Swagger](https://docs.google.com/document/d/1K1WaCZhHi35BbvQ7UAGWOlJeGBoIlLVXpW7EQ8ryFdw/edit?usp=share_link)
+
 ## Pre-requisites
-- Docker
-- Go
+- [Go](https://golang.org/doc/install)
+- [Docker](https://docs.docker.com/manuals/)
+- [Docker-compose](https://docs.docker.com/compose/)
+- [Swagger](https://github.com/swaggo/gin-swagger)
 
 ## Getting started
-To run the application, make sure you have Docker and Go installed.
+To run the application, make sure you have installed:
+- Go
+- Docker 
+- Docker-compose
+- Swagger
+
+If you don't have some of these you can face some errors, so make sure you have all of them installed, following the instructions at [Pre-requisites](#pre-requisites) section.
+
 1. Clone the repository
 ```shell
 git clone https://github.com/murilogilfelpeto/ps-tag-onboarding-go
