@@ -82,7 +82,13 @@ const docTemplate = `{
                         }
                     },
                     "422": {
-                        "description": "Id in the wrong format",
+                        "description": "ID in the wrong format",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorDto"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to connect to database",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorDto"
                         }

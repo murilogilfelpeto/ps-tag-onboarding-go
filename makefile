@@ -21,8 +21,6 @@ test:
 	@go test ./...
 docs:
 	@swag init -g cmd/ps-tag-onboarding/main.go --parseInternal --output ./api
-stack:
-	@docker compose -f $(COMPOSE_FILE) up -d
 clean:
 	@docker compose -f $(COMPOSE_FILE) down
 	@rm -rf ./api
