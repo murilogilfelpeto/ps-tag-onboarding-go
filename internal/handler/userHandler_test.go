@@ -12,6 +12,7 @@ import (
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/mapper"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/mocks"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models/exceptions"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
@@ -90,6 +91,77 @@ func TestErrorPersistingUser(t *testing.T) {
 	assert.NotEmpty(t, responseBody.Timestamp)
 	assert.Nil(t, responseBody.Field)
 }
+
+func TestErrorUserAlreadyExists(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	mockService := mocks.NewService(t)
+
+	requestBody := request.UserRequestDto{
+		FirstName: "John",
+		LastName:  "Doe",
+		Email:     "johndoe@email.com",
+		Age:       18,
+	}
+
+	jsonBody, _ := json.Marshal(requestBody)
+	ctx.Request = &http.Request{
+		Body: io.NopCloser(bytes.NewBuffer(jsonBody)),
+	}
+
+	user, _ := mapper.UserRequestToUser(requestBody)
+	err := &exceptions.UserAlreadyExistsErr{Err: errors.New("User already exists: " + user.GetFullName())}
+	mockService.EXPECT().SaveUser(ctx, user).Return(nil, err).Once()
+
+	handler := &Handler{
+		userService: mockService,
+	}
+
+	handler.Save(ctx)
+	var responseBody response.ErrorDto
+	_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
+	assert.Equal(t, http.StatusConflict, recorder.Code)
+	assert.Equal(t, err.Error(), responseBody.Message)
+	assert.NotEmpty(t, responseBody.Timestamp)
+	assert.Nil(t, responseBody.Field)
+}
+
+func TestErrorConnectingToDatabase(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	mockService := mocks.NewService(t)
+
+	requestBody := request.UserRequestDto{
+		FirstName: "John",
+		LastName:  "Doe",
+		Email:     "johndoe@email.com",
+		Age:       18,
+	}
+
+	jsonBody, _ := json.Marshal(requestBody)
+	ctx.Request = &http.Request{
+		Body: io.NopCloser(bytes.NewBuffer(jsonBody)),
+	}
+
+	user, _ := mapper.UserRequestToUser(requestBody)
+	err := &exceptions.DatabaseError{Err: errors.New("Error connecting to database")}
+	mockService.EXPECT().SaveUser(ctx, user).Return(nil, err).Once()
+
+	handler := &Handler{
+		userService: mockService,
+	}
+
+	handler.Save(ctx)
+	var responseBody response.ErrorDto
+	_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
+	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+	assert.Equal(t, err.Error(), responseBody.Message)
+	assert.NotEmpty(t, responseBody.Timestamp)
+	assert.Nil(t, responseBody.Field)
+}
+
 func TestBindJsonFailure(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	recorder := httptest.NewRecorder()
@@ -212,7 +284,8 @@ func TestUserDoesNotExist(t *testing.T) {
 	}
 	ctx.Params = pathParam
 
-	mockService.EXPECT().GetUserById(ctx, id).Return(nil, nil).Once()
+	err := &exceptions.UserNotFoundErr{Err: errors.New("No user found with id " + id)}
+	mockService.EXPECT().GetUserById(ctx, id).Return(nil, err).Once()
 
 	handler := &Handler{
 		userService: mockService,
@@ -221,9 +294,8 @@ func TestUserDoesNotExist(t *testing.T) {
 	handler.FindById(ctx)
 	var responseBody response.ErrorDto
 	_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
-	errorMessage := "No user found with id " + id
 	assert.Equal(t, http.StatusNotFound, recorder.Code)
-	assert.Equal(t, errorMessage, responseBody.Message)
+	assert.Equal(t, err.Error(), responseBody.Message)
 	assert.NotEmpty(t, responseBody.Timestamp)
 	assert.Nil(t, responseBody.Field)
 }

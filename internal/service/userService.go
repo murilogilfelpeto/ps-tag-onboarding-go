@@ -7,6 +7,7 @@ import (
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models/exceptions"
 	logger "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/topology"
 )
 
@@ -34,17 +35,20 @@ func (srv *service) SaveUser(ctx context.Context, user models.User) (*models.Use
 	if userByFullName != nil {
 		if err == nil {
 			logger.Errorf("User already exists: %v", user.GetFullName())
-			return nil, nil
+			return nil, &exceptions.UserAlreadyExistsErr{Err: errors.New("User already exists: " + user.GetFullName())}
 		}
+	}
+	if !errors.Is(err, mongo.ErrNoDocuments) {
 		logger.Errorf("Something went wrong: %v", err)
 		return nil, &exceptions.DatabaseError{Err: errors.New(errorMessage)}
 	}
+
 	createdUser, err := srv.userRepository.Save(ctx, user)
 	if err != nil {
 		var serverSelectionError topology.ServerSelectionError
-		if errors.Is(err, &serverSelectionError) {
-			logger.Errorf("Something went wrong: %v", err)
-			return nil, &exceptions.DatabaseError{Err: errors.New(errorMessage)}
+		if errors.As(err, &serverSelectionError) {
+			logger.Errorf("Error connecting to database: %v", err)
+			return nil, &exceptions.DatabaseError{Err: errors.New("Error connecting to database: ")}
 		}
 		logger.Errorf("Error persisting user: %v", err)
 		return nil, &exceptions.UserValidationErr{Err: errors.New("Error persisting user: " + user.GetFullName())}
@@ -56,10 +60,11 @@ func (srv *service) SaveUser(ctx context.Context, user models.User) (*models.Use
 func (srv *service) GetUserById(ctx context.Context, id string) (*models.User, error) {
 	logger.Infof("Getting user by id %s", id)
 	user, err := srv.userRepository.GetUserById(ctx, id)
-	if user == nil {
-		if err == nil {
-			logger.Errorf("Error finding user: %v", err)
-			return nil, nil
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			logger.Errorf("User not found: %v", err)
+			return nil, &exceptions.UserNotFoundErr{Err: errors.New("User not found: " + id)}
+
 		}
 		logger.Errorf("Something went wrong: %v", err)
 		return nil, &exceptions.DatabaseError{Err: errors.New(errorMessage)}

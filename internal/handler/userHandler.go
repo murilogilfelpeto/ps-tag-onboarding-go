@@ -1,12 +1,14 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golodash/galidator"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/dto/request"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/dto/response"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/mapper"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models/exceptions"
 	logger "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
@@ -65,22 +67,34 @@ func (h *Handler) Save(context *gin.Context) {
 	createdUser, err := h.userService.SaveUser(context, user)
 
 	if err != nil {
+		var userAlreadyExistsErr *exceptions.UserAlreadyExistsErr
+		if errors.As(err, &userAlreadyExistsErr) {
+			logger.Errorf("User already exists. %v", err)
+			errorResponse := response.ErrorDto{
+				Message:   err.Error(),
+				Timestamp: time.Now(),
+			}
+			context.IndentedJSON(http.StatusConflict, errorResponse)
+			return
+		}
+
+		var databaseError *exceptions.DatabaseError
+		if errors.As(err, &databaseError) {
+			logger.Errorf("Error connecting to database. %v", err)
+			errorResponse := response.ErrorDto{
+				Message:   "Error connecting to database",
+				Timestamp: time.Now(),
+			}
+			context.IndentedJSON(http.StatusInternalServerError, errorResponse)
+			return
+		}
+
 		logger.Errorf("Something went wrong while persisting user in database. %v", err)
 		errorResponse := response.ErrorDto{
 			Message:   "Something went wrong",
 			Timestamp: time.Now(),
 		}
 		context.IndentedJSON(http.StatusInternalServerError, errorResponse)
-		return
-	}
-
-	if createdUser == nil {
-		logger.Error("Error while persisting user. ", err)
-		errorResponse := response.ErrorDto{
-			Message:   "Error while creating user.",
-			Timestamp: time.Now(),
-		}
-		context.IndentedJSON(http.StatusUnprocessableEntity, errorResponse)
 		return
 	}
 
@@ -104,22 +118,34 @@ func (h *Handler) FindById(context *gin.Context) {
 	user, err := h.userService.GetUserById(context, id)
 
 	if err != nil {
+		var userNotFoundErr *exceptions.UserNotFoundErr
+		if errors.As(err, &userNotFoundErr) {
+			logger.Errorf("User not found. %v", err)
+			errorResponse := response.ErrorDto{
+				Message:   err.Error(),
+				Timestamp: time.Now(),
+			}
+			context.IndentedJSON(http.StatusNotFound, errorResponse)
+			return
+		}
+
+		var databaseError *exceptions.DatabaseError
+		if errors.As(err, &databaseError) {
+			logger.Errorf("Error connecting to database. %v", err)
+			errorResponse := response.ErrorDto{
+				Message:   "Error connecting to database",
+				Timestamp: time.Now(),
+			}
+			context.IndentedJSON(http.StatusInternalServerError, errorResponse)
+			return
+		}
+
 		logger.Errorf("Something went wrong in database. %v", err)
 		errorResponse := response.ErrorDto{
 			Message:   "Something went wrong",
 			Timestamp: time.Now(),
 		}
 		context.IndentedJSON(http.StatusInternalServerError, errorResponse)
-		return
-	}
-
-	if user == nil {
-		logger.Errorf("Error while finding user by id %s.", id)
-		errorResponse := response.ErrorDto{
-			Message:   "No user found with id " + id,
-			Timestamp: time.Now(),
-		}
-		context.IndentedJSON(http.StatusNotFound, errorResponse)
 		return
 	}
 
