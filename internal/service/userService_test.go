@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/mocks"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models/exceptions"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/topology"
@@ -42,8 +41,7 @@ func TestUserAlreadyExists(t *testing.T) {
 	}
 
 	createdUser, err := srv.SaveUser(context.Background(), user)
-	userAlreadyExistsErr := &exceptions.UserAlreadyExistsErr{Err: errors.New("User already exists: " + user.GetFullName())}
-	assert.Equal(t, userAlreadyExistsErr, err)
+	assert.ErrorIs(t, err, ErrUserAlreadyExists)
 	assert.Nil(t, createdUser)
 }
 
@@ -60,8 +58,7 @@ func TestDatabaseErrorGettingUserByFullName(t *testing.T) {
 	}
 
 	createdUser, err := srv.SaveUser(context.Background(), user)
-	databaseError := &exceptions.DatabaseError{Err: errors.New("something went wrong")}
-	assert.Equal(t, databaseError, err)
+	assert.ErrorIs(t, err, ErrDatabase)
 	assert.Nil(t, createdUser)
 }
 func TestErrorPersistingUser(t *testing.T) {
@@ -78,28 +75,10 @@ func TestErrorPersistingUser(t *testing.T) {
 	}
 
 	createdUser, err := srv.SaveUser(context.Background(), user)
-	assert.Error(t, err)
+	assert.ErrorIs(t, err, ErrDatabase)
 	assert.Nil(t, createdUser)
 }
 
-func TestServerSelectionErrorPersistingUser(t *testing.T) {
-	mockRepo := mocks.NewRepository(t)
-
-	user, _ := models.NewUser("f7d2ea4b-a4d0-4103-9c63-55ec7977e4d1", "John", "Doe", "john.doe@email.com", 36)
-
-	var expectedError topology.ServerSelectionError
-	mockRepo.EXPECT().GetUserByFullName(context.Background(), user.GetFirstName(), user.GetLastName()).Return(nil, mongo.ErrNoDocuments).Once()
-	mockRepo.EXPECT().Save(context.Background(), user).Return(nil, expectedError).Once()
-
-	srv := &service{
-		userRepository: mockRepo,
-	}
-
-	createdUser, err := srv.SaveUser(context.Background(), user)
-	databaseError := &exceptions.DatabaseError{Err: errors.New("Error connecting to database: ")}
-	assert.Equal(t, databaseError, err)
-	assert.Nil(t, createdUser)
-}
 func TestGetUserById(t *testing.T) {
 	mockRepo := mocks.NewRepository(t)
 
@@ -130,8 +109,7 @@ func TestUserNotFound(t *testing.T) {
 	}
 
 	user, err := srv.GetUserById(context.Background(), id)
-	userNotFoundErr := &exceptions.UserNotFoundErr{Err: errors.New("User not found: " + id)}
-	assert.Equal(t, userNotFoundErr, err)
+	assert.ErrorIs(t, err, ErrUserNotFound)
 	assert.Nil(t, user)
 }
 
@@ -147,7 +125,6 @@ func TestDatabaseError(t *testing.T) {
 	}
 
 	user, err := srv.GetUserById(context.Background(), id)
-	databaseError := &exceptions.DatabaseError{Err: errors.New("something went wrong")}
-	assert.Equal(t, databaseError, err)
+	assert.ErrorIs(t, err, ErrDatabase)
 	assert.Nil(t, user)
 }

@@ -11,8 +11,8 @@ import (
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/dto/response"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/handler/mapper"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/mocks"
+	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service"
 	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models"
-	"github.com/murilogilfelpeto/ps-tag-onboarding-go/internal/service/models/exceptions"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
@@ -77,7 +77,8 @@ func TestErrorPersistingUser(t *testing.T) {
 	}
 
 	user, _ := mapper.UserRequestToUser(requestBody)
-	mockService.EXPECT().SaveUser(ctx, user).Return(nil, errors.New("some error")).Once()
+	err := service.ErrDatabase
+	mockService.EXPECT().SaveUser(ctx, user).Return(nil, err).Once()
 
 	handler := &Handler{
 		userService: mockService,
@@ -87,7 +88,7 @@ func TestErrorPersistingUser(t *testing.T) {
 	var responseBody response.ErrorDto
 	_ = json.Unmarshal(recorder.Body.Bytes(), &responseBody)
 	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-	assert.Equal(t, "Something went wrong", responseBody.Message)
+	assert.Equal(t, err.Error(), responseBody.Message)
 	assert.NotEmpty(t, responseBody.Timestamp)
 	assert.Nil(t, responseBody.Field)
 }
@@ -111,7 +112,7 @@ func TestErrorUserAlreadyExists(t *testing.T) {
 	}
 
 	user, _ := mapper.UserRequestToUser(requestBody)
-	err := &exceptions.UserAlreadyExistsErr{Err: errors.New("User already exists: " + user.GetFullName())}
+	err := service.ErrUserAlreadyExists
 	mockService.EXPECT().SaveUser(ctx, user).Return(nil, err).Once()
 
 	handler := &Handler{
@@ -146,7 +147,7 @@ func TestErrorConnectingToDatabase(t *testing.T) {
 	}
 
 	user, _ := mapper.UserRequestToUser(requestBody)
-	err := &exceptions.DatabaseError{Err: errors.New("Error connecting to database")}
+	err := service.ErrDatabase
 	mockService.EXPECT().SaveUser(ctx, user).Return(nil, err).Once()
 
 	handler := &Handler{
@@ -284,7 +285,7 @@ func TestUserDoesNotExist(t *testing.T) {
 	}
 	ctx.Params = pathParam
 
-	err := &exceptions.UserNotFoundErr{Err: errors.New("No user found with id " + id)}
+	err := service.ErrUserNotFound
 	mockService.EXPECT().GetUserById(ctx, id).Return(nil, err).Once()
 
 	handler := &Handler{
